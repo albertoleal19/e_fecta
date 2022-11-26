@@ -1,5 +1,6 @@
 import 'package:e_fecta/presentation/plays/play_screen.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -10,6 +11,16 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isChecked = false;
+  final usernameController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  void dispose() {
+    usernameController.dispose();
+    passwordController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,8 +48,8 @@ class _LoginScreenState extends State<LoginScreen> {
                     'Login to your account',
                   ),
                   const SizedBox(height: 35),
-                  const TextField(
-                    decoration: InputDecoration(
+                  TextField(
+                    decoration: const InputDecoration(
                       labelText: 'Email',
                       hintText: 'abc@example.com',
                       enabledBorder: OutlineInputBorder(
@@ -54,11 +65,12 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                    controller: usernameController,
                   ),
                   const SizedBox(height: 20),
-                  const TextField(
+                  TextField(
                     obscureText: true,
-                    decoration: InputDecoration(
+                    decoration: const InputDecoration(
                       labelText: 'Password',
                       hintText: '********',
                       enabledBorder: OutlineInputBorder(
@@ -74,6 +86,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
                     ),
+                    controller: passwordController,
                   ),
                   const SizedBox(height: 25),
                   Row(
@@ -105,12 +118,24 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                   const SizedBox(height: 30),
                   OutlinedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        MaterialPageRoute(
-                          builder: (context) => const PlayScreen(),
-                        ),
-                      );
+                    onPressed: () async {
+                      try {
+                        await FirebaseAuth.instance.signInWithEmailAndPassword(
+                          email: usernameController.text,
+                          password: passwordController.text,
+                        );
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const PlayScreen(),
+                          ),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        if (e.code == 'user-not-found') {
+                          print('No user found for that email.');
+                        } else if (e.code == 'wrong-password') {
+                          print('Wrong password provided for that user.');
+                        }
+                      }
                     },
                     //style: OutlinedButton.
                     style: OutlinedButton.styleFrom(
