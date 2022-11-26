@@ -3,45 +3,34 @@ import 'package:flutter/material.dart';
 class HorseOption extends StatelessWidget {
   final int number;
   final bool selected;
+  final VoidCallback? onSelect;
 
   const HorseOption({
     Key? key,
     required this.number,
     this.selected = false,
+    this.onSelect,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return OutlinedButton(
       style: OutlinedButton.styleFrom(
-          backgroundColor:
-              getClothColorByNumber(number).withOpacity(selected ? 1 : 0.3),
-          onSurface:
-              getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
-          elevation: selected ? 10 : 0,
-          fixedSize: const Size(40, 40),
-          textStyle: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          )).copyWith(
+        backgroundColor:
+            getClothColorByNumber(number).withOpacity(selected ? 1 : 0.3),
+        onSurface: getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
+        elevation: selected ? 10 : 0,
+        fixedSize: const Size(40, 40),
+        textStyle: const TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+        ),
+      ).copyWith(
         foregroundColor: MaterialStateProperty.all<Color>(
           getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
         ),
       ),
-
-      // fixedSize: MaterialStateProperty.all<Size>(
-      //   const Size(40, 40),
-      // ),
-      // foregroundColor: MaterialStateProperty.all<Color>(
-      //   getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
-      // ),
-      // backgroundColor: MaterialStateProperty.all<Color>(
-      //   getClothColorByNumber(number).withOpacity(selected ? 1 : 0.3),
-      // ),
-      // textStyle: MaterialStateProperty<TextStyle>(),
-      // elevation: MaterialStateProperty.all<double>(selected ? 10 : 0),
-      //).copyWith(foregroundColor: ),
-      onPressed: () => {},
+      onPressed: onSelect,
       child: Text(
         number.toString(),
       ),
