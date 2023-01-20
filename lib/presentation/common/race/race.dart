@@ -25,29 +25,38 @@ class _RaceState extends State<Race> {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      elevation: 2,
+    return Container(
+      color: const Color(0xFF72B29D),
       margin: const EdgeInsets.only(bottom: 8),
       child: Padding(
         padding: const EdgeInsets.all(6.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text(
+              'Carrera ${widget.raceNumber}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                color: Color(0xFFFEFAFB),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Selecciona un caballo para esta carrera',
+              style: TextStyle(
+                color: Color(0xFFFEFAFB),
+                fontSize: 14,
+              ),
+            ),
+            const SizedBox(height: 24),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Carrera ${widget.raceNumber}',
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(width: 8),
                 Expanded(
                   child: Wrap(
-                    spacing: 6.0, // gap between adjacent chips
+                    spacing: 20.0, // gap between adjacent chips
                     runSpacing: 4.0, // gap between lines
                     children: widget.horses.map(
                       (horseNumber) {

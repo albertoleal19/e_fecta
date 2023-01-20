@@ -14,25 +14,37 @@ class HorseOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor:
-            getClothColorByNumber(number).withOpacity(selected ? 1 : 0.3),
-        onSurface: getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
-        elevation: selected ? 10 : 0,
-        fixedSize: const Size(40, 40),
-        textStyle: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
-      ).copyWith(
-        foregroundColor: MaterialStateProperty.all<Color>(
-          getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
-        ),
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(4),
       ),
-      onPressed: onSelect,
-      child: Text(
-        number.toString(),
+      color: const Color(0xFFFEFAFB),
+      elevation: 2,
+      child: SizedBox(
+        width: 130,
+        height: 32,
+        child: Row(
+          children: [
+            Checkbox(value: false, onChanged: (bool? newValue) => {}),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                number.toString(),
+              ),
+            ),
+            Container(
+              width: 12,
+              height: 32,
+              decoration: BoxDecoration(
+                borderRadius: const BorderRadius.only(
+                  topRight: Radius.circular(4),
+                  bottomRight: Radius.circular(4),
+                ),
+                color: getClothColorByNumber(number),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -99,10 +111,10 @@ class HorseOption extends StatelessWidget {
 }
 
 class NumberColor {
-  static const Color one = Color(0xFFFF0000);
+  static const Color one = Color(0xFFDD0037);
   static const Color two = Color(0xFFFFFFFF);
   static const Color three = Color(0xFF06007F);
-  static const Color four = Color(0xFFFEFF00);
+  static const Color four = Color(0xFFFBC640);
   static const Color five = Color(0xFF008001);
   static const Color six = Color(0xFF000000);
   static const Color seven = Color(0xFFFF6600);
