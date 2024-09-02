@@ -1,3 +1,4 @@
+import 'package:e_fecta/core/app_colors.dart';
 import 'package:flutter/material.dart';
 
 class HorseOption extends StatelessWidget {
@@ -14,25 +15,63 @@ class HorseOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return OutlinedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor:
-            getClothColorByNumber(number).withOpacity(selected ? 1 : 0.3),
-        onSurface: getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
-        elevation: selected ? 10 : 0,
-        fixedSize: const Size(40, 40),
-        textStyle: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
+    return GestureDetector(
+      onTap: onSelect,
+      child: Container(
+        width: 120,
+        height: 32,
+        decoration: BoxDecoration(
+          color: AppColors.white,
+          borderRadius: BorderRadius.circular(4),
+          boxShadow: const [
+            BoxShadow(
+              color: Colors.black,
+              blurRadius: 2,
+              offset: Offset(3, 3), // Shadow position
+            ),
+          ],
         ),
-      ).copyWith(
-        foregroundColor: MaterialStateProperty.all<Color>(
-          getTextColorByNumber(number).withOpacity(selected ? 1 : 0.7),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Row(
+            children: [
+              Radio<int>(
+                value: number,
+                groupValue: selected ? number : -1,
+                toggleable: true,
+                onChanged: (value) {
+                  onSelect!();
+                },
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  number.toString(),
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              Container(
+                width: 12,
+                decoration: BoxDecoration(
+                  color: getClothColorByNumber(number),
+                  borderRadius: const BorderRadius.only(
+                      topRight: Radius.circular(4),
+                      bottomRight: Radius.circular(4)),
+                  border: Border.all(
+                    color: getClothColorByNumber(number) == NumberColor.two
+                        ? const Color(0xFFDBDBDB)
+                        : Colors.transparent,
+                  ),
+                ),
+                // color: getClothColorByNumber(number),
+              ),
+            ],
+          ),
         ),
-      ),
-      onPressed: onSelect,
-      child: Text(
-        number.toString(),
       ),
     );
   }
@@ -69,31 +108,6 @@ class HorseOption extends StatelessWidget {
         return NumberColor.fourteen;
       default:
         return NumberColor.fourteen;
-    }
-  }
-
-  Color getTextColorByNumber(int? number) {
-    switch (number) {
-      case 1:
-      case 3:
-      case 5:
-      case 10:
-      case 13:
-        return Colors.white;
-      case 2:
-      case 4:
-      case 7:
-      case 8:
-      case 9:
-      case 12:
-        return Colors.black;
-      case 6:
-      case 14:
-        return const Color(0xFFFBDC50);
-      case 11:
-        return const Color(0xFFAD0000);
-      default:
-        return Colors.white;
     }
   }
 }

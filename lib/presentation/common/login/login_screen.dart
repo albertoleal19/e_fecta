@@ -120,10 +120,10 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton(
                     onPressed: () async {
                       try {
-                        await FirebaseAuth.instance.signInWithEmailAndPassword(
-                          email: usernameController.text,
-                          password: passwordController.text,
-                        );
+                        // await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        //   email: usernameController.text,
+                        //   password: passwordController.text,
+                        // );
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => const PlayScreen(),
@@ -149,6 +149,39 @@ class _LoginScreenState extends State<LoginScreen> {
                       'Login now',
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  OutlinedButton(
+                    onPressed: () async {
+                      try {
+                        await FirebaseAuth.instance
+                            .createUserWithEmailAndPassword(
+                          email: 'albertoleal19+1@gmail.com',
+                          password: '12345678',
+                        );
+                        print('User Registered Successfuly');
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => const PlayScreen(),
+                          ),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        print('Error on register: $e');
+                      }
+                    },
+                    //style: OutlinedButton.
+                    style: OutlinedButton.styleFrom(
+                      backgroundColor: Colors.white70,
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 20,
+                        horizontal: 10,
+                      ),
+                    ),
+                    child: const Text(
+                      'Register',
+                      style: TextStyle(
+                          color: Colors.green, fontWeight: FontWeight.bold),
                     ),
                   ),
                 ],
