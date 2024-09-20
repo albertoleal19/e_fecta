@@ -46,31 +46,44 @@ class PlayScreen extends StatelessWidget {
                           style: TextStyle(fontSize: 64),
                         ),
                       ),
-                      Container(
-                        color: AppColors.darkBlue,
-                        height: 500,
-                        // child: UserInfo(),
-                        child: ListView.builder(
-                          itemBuilder: (context, index) {
-                            return ResultListItem();
-                            // return Row(
-                            //   children: [
-                            //     Expanded(
-                            //       child: Column(
-                            //         children: [
-                            //           UserInfo(),
-                            //           TicketInfo(),
-                            //         ],
-                            //       ),
-                            //     ),
-                            //     Container(
-                            //       width: 40,
-                            //       color: AppColors.darkGrey,
-                            //     ),
-                            //   ],
-                            // );
-                          },
-                          itemCount: 10,
+                      Center(
+                        child: Container(
+                          color: AppColors.darkBlue,
+                          constraints: const BoxConstraints(maxWidth: 1000),
+                          height: 730,
+                          // child: UserInfo(),
+                          child: Column(
+                            children: [
+                              Container(
+                                color: AppColors.darkerGreen,
+                                alignment: Alignment.centerRight,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.max,
+                                  children: [
+                                    Expanded(child: Container()),
+                                    Container(
+                                      alignment: Alignment.center,
+                                      color: AppColors.green,
+                                      width: 66,
+                                      height: 50,
+                                      child: const Text(
+                                        'Total',
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: ListView.builder(
+                                  physics: const ClampingScrollPhysics(),
+                                  itemBuilder: (context, index) {
+                                    return const ResultListItem();
+                                  },
+                                  itemCount: 20,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
