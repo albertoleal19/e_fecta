@@ -75,7 +75,7 @@ class PlayScreen extends StatelessWidget {
                               ),
                               Expanded(
                                 child: ListView.builder(
-                                  physics: const ClampingScrollPhysics(),
+                                  physics: const NeverScrollableScrollPhysics(),
                                   itemBuilder: (context, index) {
                                     return const ResultListItem();
                                   },
