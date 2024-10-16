@@ -22,18 +22,23 @@ class ResultListItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Builder(builder: (context) {
                   if (!isCompressedScreen) {
-                    return const Column(
+                    return Column(
                       children: [
                         Expanded(
                           child: Row(
                             children: [
                               Expanded(flex: 6, child: UserInfo()),
-                              Expanded(
-                                  flex: 4,
-                                  child: TicketInfo(
-                                    maxWidth: 300,
-                                    padding: EdgeInsets.only(right: 20),
-                                  )),
+                              Flexible(
+                                flex: 4,
+                                child: Container(
+                                  color: AppColors.errorRed,
+                                  width: 300,
+                                ),
+                                // child: TicketInfo(
+                                //   maxWidth: 300,
+                                //   padding: EdgeInsets.only(right: 20),
+                                // ),
+                              ),
                             ],
                           ),
                         ),
@@ -123,11 +128,16 @@ class UserInfo extends StatelessWidget {
 }
 
 class TicketInfo extends StatelessWidget {
-  const TicketInfo({Key? key, this.maxWidth = double.maxFinite, this.padding})
-      : super(key: key);
+  const TicketInfo({
+    Key? key,
+    this.maxWidth = double.maxFinite,
+    this.padding,
+    this.options = const [],
+  }) : super(key: key);
 
   final double maxWidth;
   final EdgeInsets? padding;
+  final List<int> options;
 
   @override
   Widget build(BuildContext context) {
@@ -136,43 +146,52 @@ class TicketInfo extends StatelessWidget {
         child: Container(
           padding: padding,
           constraints: BoxConstraints(minWidth: 200, maxWidth: maxWidth),
-          child: const Column(
+          child: Column(
             children: [
               Row(
                 children: [
-                  Text('Carrera'),
-                  SizedBox(width: 30),
+                  const Text('Carrera'),
+                  const SizedBox(width: 30),
                   Expanded(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TicketInfoItem(value: '1a'),
-                        TicketInfoItem(value: '2a'),
-                        TicketInfoItem(value: '3a'),
-                        TicketInfoItem(value: '4a'),
-                        TicketInfoItem(value: '5a'),
-                        TicketInfoItem(value: '6a'),
-                      ],
+                      children: List<Widget>.generate(
+                        6,
+                        (index) => TicketInfoItem(value: '${index + 1}a'),
+                      ),
+                      // children: [
+                      //   TicketInfoItem(value: '1a'),
+                      //   TicketInfoItem(value: '2a'),
+                      //   TicketInfoItem(value: '3a'),
+                      //   TicketInfoItem(value: '4a'),
+                      //   TicketInfoItem(value: '5a'),
+                      //   TicketInfoItem(value: '6a'),
+                      // ],
                     ),
                   )
                 ],
               ),
-              SizedBox(height: 6),
+              const SizedBox(height: 6),
               Row(
                 children: [
-                  Text('Caballo'),
-                  SizedBox(width: 30),
+                  const Text('Caballo'),
+                  const SizedBox(width: 30),
                   Expanded(
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        TicketInfoItem(value: '1'),
-                        TicketInfoItem(value: '2'),
-                        TicketInfoItem(value: '3'),
-                        TicketInfoItem(value: '4'),
-                        TicketInfoItem(value: '5'),
-                        TicketInfoItem(value: '6'),
-                      ],
+                      children: List<Widget>.generate(
+                        options.length,
+                        (index) => TicketInfoItem(value: '${options[index]}'),
+                      ),
+                      //children: [
+                      // options.forEach((e) => TicketInfoItem(value: e.toString())),
+                      // TicketInfoItem(value: '1'),
+                      // TicketInfoItem(value: '2'),
+                      // TicketInfoItem(value: '3'),
+                      // TicketInfoItem(value: '4'),
+                      // TicketInfoItem(value: '5'),
+                      // TicketInfoItem(value: '6'),
+                      //],
                     ),
                   )
                 ],

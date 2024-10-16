@@ -1,20 +1,27 @@
 import 'package:e_fecta/core/app_colors.dart';
+import 'package:e_fecta/core/size_contants.dart';
+import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../horse_option.dart';
 
 class Race extends StatefulWidget {
   final int raceNumber;
-  final int selectedHorse;
+  final List<int>? selectedHorses;
   final List<int> horses;
   final bool multiselection;
+  final bool compressed;
+  final Function(List<int>)? onSelectionChanged;
 
   const Race({
     Key? key,
     required this.raceNumber,
-    this.selectedHorse = -1,
+    this.selectedHorses,
     this.horses = const [],
     this.multiselection = false,
+    this.compressed = true,
+    this.onSelectionChanged,
   }) : super(key: key);
 
   @override
@@ -22,39 +29,47 @@ class Race extends StatefulWidget {
 }
 
 class _RaceState extends State<Race> {
-  List<int> selectedHourses = <int>[];
+  late List<int> selectedHourses;
+
+  @override
+  void initState() {
+    selectedHourses = widget.selectedHorses ?? <int>[];
+    super.initState();
+  }
+
+  // @override
+  // void didUpdateWidget(covariant Race oldWidget) {
+  //   selectedHourses = widget.selectedHorses ?? <int>[];
+  //   super.didUpdateWidget(oldWidget);
+  // }
 
   @override
   Widget build(BuildContext context) {
-    return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 600,
-      ),
-      child: Wrap(
-        spacing: 24.0, // gap between adjacent chips
-        runSpacing: 14.0, // gap between lines
+    return Wrap(
+      spacing: widget.compressed ? 12.0 : 20, // gap between adjacent chips
+      runSpacing: 14.0, // gap between lines
 
-        children: widget.horses.map(
-          (horseNumber) {
-            return HorseOption(
-              number: horseNumber,
-              onSelect: () {
-                setState(() {
-                  if (!widget.multiselection) {
-                    selectedHourses.clear();
-                    selectedHourses.add(horseNumber);
-                  } else if (selectedHourses.contains(horseNumber)) {
-                    selectedHourses.remove(horseNumber);
-                  } else {
-                    selectedHourses.add(horseNumber);
-                  }
-                });
-              },
-              selected: selectedHourses.contains(horseNumber),
-            );
-          },
-        ).toList(),
-      ),
+      children: widget.horses.map(
+        (horseNumber) {
+          return HorseOption(
+            number: horseNumber,
+            onSelect: () {
+              setState(() {
+                if (!widget.multiselection) {
+                  selectedHourses.clear();
+                  selectedHourses.add(horseNumber);
+                } else if (selectedHourses.contains(horseNumber)) {
+                  selectedHourses.remove(horseNumber);
+                } else {
+                  selectedHourses.add(horseNumber);
+                }
+                widget.onSelectionChanged?.call(selectedHourses);
+              });
+            },
+            selected: selectedHourses.contains(horseNumber),
+          );
+        },
+      ).toList(),
     );
   }
 

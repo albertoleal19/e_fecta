@@ -21,11 +21,13 @@ class EfectaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'e-Fecta',
+      title: 'E-Fecta',
       theme: ThemeData(
         colorScheme: const ColorScheme(
           brightness: Brightness.dark,
           primary: AppColors.darkGreen,
+          background: AppColors.green,
+          onBackground: AppColors.white,
           onPrimary: AppColors.white,
           secondary: AppColors.green,
           onSecondary: AppColors.white,
@@ -34,35 +36,40 @@ class EfectaApp extends StatelessWidget {
           surface: AppColors.darkGreen,
           onSurface: AppColors.white,
         ),
-        radioTheme: RadioThemeData(
-          fillColor: WidgetStateProperty.resolveWith(
-            (states) {
-              return Colors.black;
-            },
-          ),
-        ),
+        radioTheme:
+            RadioThemeData(fillColor: MaterialStateProperty.all(Colors.black)
+                // fillColor: WidgetStateProperty.resolveWith(
+                //   (states) {
+                //     return Colors.black;
+                //   },
+                // ),
+                ),
         textButtonTheme: TextButtonThemeData(
           style: ButtonStyle(
-            foregroundColor: WidgetStateProperty.resolveWith(
-              (states) {
-                return AppColors.lightGreen;
-              },
-            ),
+            foregroundColor: MaterialStateProperty.all(AppColors.lightGreen),
+            // foregroundColor: WidgetStateProperty.resolveWith(
+            //   (states) {
+            //     return AppColors.lightGreen;
+            //   },
+            // ),
           ),
         ),
         elevatedButtonTheme: ElevatedButtonThemeData(
           style: ButtonStyle(
-            backgroundColor: WidgetStateProperty.resolveWith(
-              (states) {
-                return AppColors.lightGreen;
-              },
-            ),
-            foregroundColor: WidgetStateProperty.resolveWith(
-              (states) {
-                return AppColors.darkBlue;
-              },
-            ),
-            shape: WidgetStateProperty.all<RoundedRectangleBorder>(
+            backgroundColor: MaterialStateProperty.all(AppColors.lightGreen),
+            foregroundColor: MaterialStateProperty.all(AppColors.darkBlue),
+
+            // backgroundColor: WidgetStateProperty.resolveWith(
+            //   (states) {
+            //     return AppColors.lightGreen;
+            //   },
+            // ),
+            // foregroundColor: WidgetStateProperty.resolveWith(
+            //   (states) {
+            //     return AppColors.darkBlue;
+            //   },
+            // ),
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
               const RoundedRectangleBorder(
                 borderRadius: BorderRadius.all(Radius.circular(4)),
               ),

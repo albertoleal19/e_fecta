@@ -4,12 +4,14 @@ import 'package:flutter/material.dart';
 class HorseOption extends StatelessWidget {
   final int number;
   final bool selected;
+  final bool compressed;
   final VoidCallback? onSelect;
 
   const HorseOption({
     Key? key,
     required this.number,
     this.selected = false,
+    this.compressed = true,
     this.onSelect,
   }) : super(key: key);
 
@@ -18,7 +20,7 @@ class HorseOption extends StatelessWidget {
     return GestureDetector(
       onTap: onSelect,
       child: Container(
-        width: 120,
+        width: compressed ? 70 : 120,
         height: 32,
         decoration: BoxDecoration(
           color: AppColors.white,
@@ -43,7 +45,7 @@ class HorseOption extends StatelessWidget {
                   onSelect!();
                 },
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: compressed ? 4 : 12),
               Expanded(
                 child: Text(
                   number.toString(),
