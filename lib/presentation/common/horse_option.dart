@@ -6,6 +6,7 @@ class HorseOption extends StatelessWidget {
   final bool selected;
   final bool compressed;
   final VoidCallback? onSelect;
+  final bool selectable;
 
   const HorseOption({
     Key? key,
@@ -13,15 +14,20 @@ class HorseOption extends StatelessWidget {
     this.selected = false,
     this.compressed = true,
     this.onSelect,
+    this.selectable = true,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onSelect,
+      onTap: selectable ? onSelect : null,
       child: Container(
-        width: compressed ? 70 : 120,
-        height: 32,
+        width: selectable
+            ? compressed
+                ? 70
+                : 120
+            : 50,
+        height: selectable ? 32 : 26,
         decoration: BoxDecoration(
           color: AppColors.white,
           borderRadius: BorderRadius.circular(4),
@@ -37,18 +43,21 @@ class HorseOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: Row(
             children: [
-              Radio<int>(
-                value: number,
-                groupValue: selected ? number : -1,
-                toggleable: true,
-                onChanged: (value) {
-                  onSelect!();
-                },
-              ),
+              if (selectable) ...{
+                Radio<int>(
+                  value: number,
+                  groupValue: selected ? number : -1,
+                  toggleable: true,
+                  onChanged: (value) {
+                    onSelect!();
+                  },
+                ),
+              },
               SizedBox(width: compressed ? 4 : 12),
               Expanded(
                 child: Text(
                   number.toString(),
+                  textAlign: selectable ? TextAlign.start : TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

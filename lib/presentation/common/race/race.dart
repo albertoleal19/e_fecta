@@ -1,16 +1,14 @@
-import 'package:e_fecta/core/app_colors.dart';
-import 'package:e_fecta/core/size_contants.dart';
-import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../horse_option.dart';
+
+enum SelectionConfig { single, multi, none }
 
 class Race extends StatefulWidget {
   final int raceNumber;
   final List<int>? selectedHorses;
   final List<int> horses;
-  final bool multiselection;
+  final SelectionConfig selectionConfig;
   final bool compressed;
   final Function(List<int>)? onSelectionChanged;
 
@@ -19,7 +17,7 @@ class Race extends StatefulWidget {
     required this.raceNumber,
     this.selectedHorses,
     this.horses = const [],
-    this.multiselection = false,
+    this.selectionConfig = SelectionConfig.single,
     this.compressed = true,
     this.onSelectionChanged,
   }) : super(key: key);
@@ -52,18 +50,21 @@ class _RaceState extends State<Race> {
       children: widget.horses.map(
         (horseNumber) {
           return HorseOption(
+            selectable: widget.selectionConfig != SelectionConfig.none,
             number: horseNumber,
             onSelect: () {
               setState(() {
-                if (!widget.multiselection) {
-                  selectedHourses.clear();
-                  selectedHourses.add(horseNumber);
-                } else if (selectedHourses.contains(horseNumber)) {
-                  selectedHourses.remove(horseNumber);
-                } else {
-                  selectedHourses.add(horseNumber);
+                if (widget.selectionConfig != SelectionConfig.none) {
+                  if (widget.selectionConfig == SelectionConfig.single) {
+                    selectedHourses.clear();
+                    selectedHourses.add(horseNumber);
+                  } else if (selectedHourses.contains(horseNumber)) {
+                    selectedHourses.remove(horseNumber);
+                  } else {
+                    selectedHourses.add(horseNumber);
+                  }
+                  widget.onSelectionChanged?.call(selectedHourses);
                 }
-                widget.onSelectionChanged?.call(selectedHourses);
               });
             },
             selected: selectedHourses.contains(horseNumber),

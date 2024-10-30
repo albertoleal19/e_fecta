@@ -1,8 +1,12 @@
 import 'package:e_fecta/core/app_colors.dart';
+import 'package:e_fecta/presentation/admin/bloc/cubit/admin_cubit.dart';
+import 'package:e_fecta/presentation/common/header/cubit/header_cubit.dart';
 import 'package:e_fecta/presentation/common/login/login_screen.dart';
+import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:e_fecta/presentation/plays/play_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'firebase_options.dart';
 
@@ -77,7 +81,20 @@ class EfectaApp extends StatelessWidget {
           ),
         ),
       ),
-      home: const PlayScreen(),
+      home: MultiBlocProvider(
+        providers: [
+          BlocProvider<PlaysCubit>(
+            create: (BuildContext context) => PlaysCubit(),
+          ),
+          BlocProvider<HeaderCubit>(
+            create: (BuildContext context) => HeaderCubit()..loadInfo(),
+          ),
+          BlocProvider<AdminCubit>(
+            create: (BuildContext context) => AdminCubit(),
+          ),
+        ],
+        child: const PlayScreen(),
+      ),
     );
   }
 }

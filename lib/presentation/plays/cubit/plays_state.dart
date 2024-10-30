@@ -2,13 +2,10 @@ part of 'plays_cubit.dart';
 
 abstract class PlaysState with EquatableMixin {
   const PlaysState({
-    // required this.selectedHourses,
-    // required this.step,
     required this.ticketsCount,
     required this.tokensCount,
   });
-  // final List<int> selectedHourses;
-  // final int step;
+
   final int ticketsCount;
   final int tokensCount;
 }
@@ -17,27 +14,45 @@ abstract class PlaysChangeState extends PlaysState {
   const PlaysChangeState({
     required this.selectedHourses,
     required this.isValidPlay,
+    required this.exceededTokens,
     required int ticketsCount,
     required int tokensCount,
-  }) : super(ticketsCount: ticketsCount, tokensCount: tokensCount);
+  }) : super(
+          ticketsCount: ticketsCount,
+          tokensCount: tokensCount,
+        );
 
   final List<List<int>> selectedHourses;
   final bool isValidPlay;
+  final bool exceededTokens;
 }
 
-class PlaysInitial extends PlaysChangeState with EquatableMixin {
+class TogglePlaysSelectionState extends PlaysState with EquatableMixin {
+  TogglePlaysSelectionState(this.opened)
+      : super(
+          tokensCount: 0,
+          ticketsCount: 0,
+        );
+
+  final bool opened;
+
+  @override
+  List<Object?> get props => [
+        opened,
+        tokensCount,
+        ticketsCount,
+      ];
+}
+
+class PlaysInitial extends PlaysState with EquatableMixin {
   PlaysInitial()
       : super(
-          selectedHourses: <List<int>>[],
-          isValidPlay: false,
           tokensCount: 0,
           ticketsCount: 0,
         );
 
   @override
   List<Object?> get props => [
-        selectedHourses,
-        isValidPlay,
         tokensCount,
         ticketsCount,
       ];
@@ -65,17 +80,39 @@ class PlaysInitial extends PlaysChangeState with EquatableMixin {
 //       ];
 // }
 
+class PlaysRacesConfigLoaded extends PlaysState {
+  PlaysRacesConfigLoaded({
+    required this.racesOptions,
+    required int ticketsCount,
+    required int tokenCounts,
+  }) : super(
+          tokensCount: tokenCounts,
+          ticketsCount: ticketsCount,
+        );
+
+  final List<List<int>> racesOptions;
+
+  @override
+  List<Object?> get props => [
+        racesOptions,
+        tokensCount,
+        ticketsCount,
+      ];
+}
+
 class PlaysSelectionChanged extends PlaysChangeState {
   PlaysSelectionChanged({
     required List<List<int>> selectedHourses,
     required int ticketsCount,
     required int tokenCounts,
     required bool isValidPlay,
+    required bool exceededTokens,
   }) : super(
           selectedHourses: selectedHourses,
           isValidPlay: isValidPlay,
           tokensCount: tokenCounts,
           ticketsCount: ticketsCount,
+          exceededTokens: exceededTokens,
         );
 
   @override
@@ -84,6 +121,7 @@ class PlaysSelectionChanged extends PlaysChangeState {
         tokensCount,
         ticketsCount,
         isValidPlay,
+        exceededTokens,
       ];
 }
 

@@ -1,3 +1,9 @@
+import 'package:e_fecta/data/race_repository.dart';
+import 'package:e_fecta/data/user_repository.dart';
+import 'package:e_fecta/domain/entities/raceday.dart';
+import 'package:e_fecta/domain/entities/user.dart';
+import 'package:e_fecta/domain/repositories/race_repository.dart';
+import 'package:e_fecta/domain/repositories/user_repository.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -10,44 +16,91 @@ class PlaysCubit extends Cubit<PlaysState> {
   int ticketsCount = 0;
   int tokensCount = 0;
 
-  bool isValidPlay() {
+  late User _currentUser;
+  late Raceday _racedayInfo;
+
+  final UserRepository userRepository = UserRepositoryImpl();
+  final RaceRepository receRepository = RaceRepositoryImpl();
+
+  bool _playSelectionpOpened = false;
+  String _trackId = '';
+
+  bool _isValidPlay() {
     return !playSelection.any((element) => element.isEmpty);
   }
 
-  List<List<int>> getSelectionForStates() {
+  List<List<int>> _getSelectionForStates() {
     return playSelection.map((e) => e.toList()).toList();
+  }
+
+  Future<void> setTrack(String trackId) async {
+    _trackId = trackId;
+    _loadConfigurationInfo();
+  }
+
+  void togglePlaysSelections() {
+    _playSelectionpOpened = !_playSelectionpOpened;
+    emit(TogglePlaysSelectionState(_playSelectionpOpened));
   }
 
   Future<void> setSelection({
     required List<int> optionSelected,
     required int race,
   }) async {
-    playSelection[race].clear();
-    playSelection[race].addAll(optionSelected);
+    final List<Set<int>> pleriminarySelection = List.from(playSelection);
 
-    ticketsCount = playSelection
+    pleriminarySelection[race].clear();
+    pleriminarySelection[race].addAll(optionSelected);
+
+    final preliminaryTicketsCount = pleriminarySelection
         .map((e) => e.length)
         .reduce((value, element) => value * element);
 
-    tokensCount = 2 * ticketsCount;
+    if (preliminaryTicketsCount * 2 > _currentUser.tokens) {
+      emit(
+        PlaysSelectionChanged(
+          selectedHourses: _getSelectionForStates(),
+          isValidPlay: _isValidPlay(),
+          tokenCounts: preliminaryTicketsCount * 2,
+          ticketsCount: preliminaryTicketsCount,
+          exceededTokens: true,
+        ),
+      );
+    } else {
+      // playSelection[race].clear();
+      // playSelection[race].addAll(optionSelected);
+      playSelection = List.from(pleriminarySelection);
+
+      // ticketsCount = playSelection
+      //     .map((e) => e.length)
+      //     .reduce((value, element) => value * element);
+
+      ticketsCount = preliminaryTicketsCount;
+
+      tokensCount = 2 * ticketsCount;
+
+      emit(
+        PlaysSelectionChanged(
+          selectedHourses: _getSelectionForStates(),
+          isValidPlay: _isValidPlay(),
+          // step: step,
+          tokenCounts: tokensCount,
+          ticketsCount: ticketsCount,
+          exceededTokens: false,
+        ),
+      );
+    }
 
     print(playSelection);
     print('---------------------');
     print(
-      'Tickets:  $ticketsCount  --- Tokens: $tokensCount --- Race: $race -- ValidPlay: ${isValidPlay()}',
-    );
-
-    emit(
-      PlaysSelectionChanged(
-        selectedHourses: getSelectionForStates(),
-        isValidPlay: isValidPlay(),
-        // step: step,
-        tokenCounts: tokensCount,
-        ticketsCount: ticketsCount,
-      ),
+      'Tickets:  $ticketsCount  --- Tokens: $tokensCount --- Race: $race -- ValidPlay: ${_isValidPlay()}',
     );
   }
 
+  Future<void> getRacedayConfig() async {
+    _loadConfigurationInfo();
+  }
   // Future<void> nextStep() async {
   //   step++;
   //   print('Step: $step');
@@ -89,10 +142,11 @@ class PlaysCubit extends Cubit<PlaysState> {
   Future<void> modifySelection() async {
     emit(
       PlaysSelectionChanged(
-        selectedHourses: getSelectionForStates(),
-        isValidPlay: isValidPlay(),
+        selectedHourses: _getSelectionForStates(),
+        isValidPlay: _isValidPlay(),
         tokenCounts: tokensCount,
         ticketsCount: ticketsCount,
+        exceededTokens: false,
       ),
     );
   }
@@ -118,18 +172,23 @@ class PlaysCubit extends Cubit<PlaysState> {
   Future<void> sealTicket() async {
     print('------------- Send tickets to server --------------');
 
-    emit(
-      PlaysFinished(
-        ticketsCount: ticketsCount,
-        tokensCount: tokensCount,
-      ),
-    );
     playSelection = [{}, {}, {}, {}, {}, {}];
     tokensCount = 0;
     ticketsCount = 0;
+    _playSelectionpOpened = false;
     emit(
-      PlaysInitial(),
+      TogglePlaysSelectionState(_playSelectionpOpened),
     );
+  }
+
+  void _loadConfigurationInfo() async {
+    _currentUser = await userRepository.getUser();
+    _racedayInfo = await receRepository.getRecedayInfo(_trackId);
+    emit(PlaysRacesConfigLoaded(
+      racesOptions: _racedayInfo.racesOptions,
+      ticketsCount: ticketsCount,
+      tokenCounts: tokensCount,
+    ));
   }
 
   List<List<int>> _generateCombinations(List<List<int>> selectedOptions) {

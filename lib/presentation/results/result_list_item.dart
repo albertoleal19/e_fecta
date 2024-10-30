@@ -1,8 +1,6 @@
 import 'package:e_fecta/core/app_colors.dart';
 import 'package:e_fecta/core/size_contants.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class ResultListItem extends StatelessWidget {
   const ResultListItem({Key? key}) : super(key: key);
@@ -22,7 +20,7 @@ class ResultListItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Builder(builder: (context) {
                   if (!isCompressedScreen) {
-                    return Column(
+                    return const Column(
                       children: [
                         Expanded(
                           child: Row(
@@ -30,10 +28,14 @@ class ResultListItem extends StatelessWidget {
                               Expanded(flex: 6, child: UserInfo()),
                               Flexible(
                                 flex: 4,
-                                child: Container(
-                                  color: AppColors.errorRed,
-                                  width: 300,
+                                child: TicketInfo2(
+                                  maxWidth: 300,
+                                  padding: EdgeInsets.only(right: 20),
                                 ),
+                                // child: Container(
+                                //   color: AppColors.errorRed,
+                                //   width: 300,
+                                // ),
                                 // child: TicketInfo(
                                 //   maxWidth: 300,
                                 //   padding: EdgeInsets.only(right: 20),
@@ -47,15 +49,16 @@ class ResultListItem extends StatelessWidget {
                     );
                   } else {
                     return const Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Expanded(flex: 6, child: UserInfo()),
                         Expanded(
-                            flex: 4,
-                            child: Center(
-                                child: TicketInfo(
-                                    padding: EdgeInsets.only(right: 20)))),
+                          flex: 4,
+                          child: TicketInfo2(
+                            padding: EdgeInsets.only(right: 20),
+                          ),
+                        ),
                         Divider(),
                       ],
                     );
@@ -204,6 +207,73 @@ class TicketInfo extends StatelessWidget {
   }
 }
 
+class TicketInfo2 extends StatelessWidget {
+  const TicketInfo2({
+    Key? key,
+    this.maxWidth = double.maxFinite,
+    this.padding,
+    this.options = const [0, 0, 0, 0, 0, 0],
+  }) : super(key: key);
+
+  final double maxWidth;
+  final EdgeInsets? padding;
+  final List<int> options;
+
+  @override
+  Widget build(BuildContext context) {
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: maxWidth),
+      child: Padding(
+        padding: padding ?? EdgeInsets.zero,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 30.0),
+                  child: Text('Carrera'),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ...List<Widget>.generate(
+                        6,
+                        (index) => TicketInfoItem(value: '${index + 1}a'),
+                        // (index) => Text('${index + 1}a'),
+                      ),
+                    ],
+                  ),
+                )
+              ],
+            ),
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 30.0),
+                  child: Text('Caballo'),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ...List<Widget>.generate(
+                        options.length,
+                        (index) => TicketInfoItem(value: '${options[index]}'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class TicketInfoItem extends StatelessWidget {
   const TicketInfoItem({Key? key, required this.value}) : super(key: key);
 
@@ -211,13 +281,11 @@ class TicketInfoItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Flexible(
-      child: Container(
-        constraints: const BoxConstraints(minWidth: 15, maxHeight: 30),
-        child: Text(
-          value,
-          textAlign: TextAlign.center,
-        ),
+    return Container(
+      constraints: const BoxConstraints(minWidth: 15, maxHeight: 30),
+      child: Text(
+        value,
+        textAlign: TextAlign.center,
       ),
     );
   }

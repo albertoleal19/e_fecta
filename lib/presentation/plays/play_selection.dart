@@ -3,23 +3,27 @@ import 'package:e_fecta/core/size_contants.dart';
 import 'package:e_fecta/presentation/common/race/race.dart';
 import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:e_fecta/presentation/results/result_list_item.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-class PlaySelection extends StatelessWidget {
-  const PlaySelection({Key? key, required this.races}) : super(key: key);
+class PlaySelection extends StatefulWidget {
+  const PlaySelection({Key? key}) : super(key: key);
 
-  final List<List<int>> races;
+  @override
+  State<PlaySelection> createState() => _PlaySelectionState();
+}
 
-  // late PlaysCubit? cubit;
+class _PlaySelectionState extends State<PlaySelection> {
+  List<List<int>>? races;
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<PlaysCubit>();
+    cubit.getRacedayConfig();
+    double screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompressedView = screenWidth <= WindowSizeContants.medium;
     return Container(
-      alignment: Alignment.centerRight,
+      alignment: isCompressedView ? Alignment.centerRight : Alignment.center,
       color: AppColors.green,
       padding: const EdgeInsets.only(top: 20.0, bottom: 20.0, left: 20.0),
       child: Container(
@@ -30,14 +34,21 @@ class PlaySelection extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(30.0),
         color: AppColors.darkGreen,
-        child: BlocBuilder<PlaysCubit, PlaysState>(
+        child: BlocConsumer<PlaysCubit, PlaysState>(
+          listener: (BuildContext context, PlaysState state) {
+            if (state is PlaysRacesConfigLoaded) {
+              races = state.racesOptions;
+            }
+          },
           buildWhen: (previous, current) =>
-              current is PlaysInitial ||
               current is PlaysSelectionChanged ||
+              current is PlaysRacesConfigLoaded ||
               current is PlaysSummary,
           builder: (context, state) {
-            if (state is PlaysInitial || state is PlaysSelectionChanged) {
-              final currentState = state as PlaysChangeState;
+            if (state is PlaysSelectionChanged ||
+                state is PlaysRacesConfigLoaded) {
+              final selection =
+                  state is PlaysChangeState ? state.selectedHourses : [];
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -49,7 +60,7 @@ class PlaySelection extends StatelessWidget {
                   ...List<Widget>.generate(
                     6,
                     (index) {
-                      final List<int> options = List.from(races[index]);
+                      final List<int> options = List.from(races?[index] ?? []);
                       options.sort((a, b) => a.compareTo(b));
 
                       return Column(
@@ -66,13 +77,11 @@ class PlaySelection extends StatelessWidget {
                           Race(
                             raceNumber: index,
                             horses: options,
-                            multiselection: true,
+                            selectionConfig: SelectionConfig.multi,
                             selectedHorses:
-                                currentState.selectedHourses.isNotEmpty
-                                    ? currentState.selectedHourses[index]
-                                    : [],
+                                selection.isNotEmpty ? selection[index] : [],
                             onSelectionChanged: (List<int> selected) {
-                              cubit?.setSelection(
+                              cubit.setSelection(
                                 optionSelected: selected,
                                 race: index,
                               );
@@ -90,6 +99,15 @@ class PlaySelection extends StatelessWidget {
                   Center(
                     child: Column(
                       children: [
+                        if (state is PlaysChangeState &&
+                            state.exceededTokens) ...[
+                          const Text(
+                            'No puedes seleccionar mas opciones, no tienes tokens suficientes.',
+                            style: TextStyle(
+                                color: AppColors.errorYellow, fontSize: 16),
+                          ),
+                          const SizedBox(height: 20),
+                        ],
                         SizedBox(
                           height: 30,
                           child: Row(
@@ -102,15 +120,20 @@ class PlaySelection extends StatelessWidget {
                               const VerticalDivider(),
                               Text(
                                 '${state.tokensCount} Tokens',
-                                style: const TextStyle(fontSize: 14),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         const SizedBox(height: 20),
                         ElevatedButton(
-                          onPressed:
-                              state.isValidPlay ? cubit.calcultaSummary : null,
+                          onPressed: state is PlaysChangeState
+                              ? (state.isValidPlay && !state.exceededTokens
+                                  ? cubit.calcultaSummary
+                                  : null)
+                              : null,
                           child: const Text('Ver Resumen'),
                         ),
                       ],
@@ -276,7 +299,12 @@ class _SummaryList extends StatelessWidget {
                               ),
                             ),
                           ),
-                          TicketInfo(options: state.tickets[index])
+                          Expanded(
+                              child:
+                                  TicketInfo2(options: state.tickets[index])),
+                          const SizedBox(
+                            width: 12,
+                          ),
                         ],
                       );
                     },
