@@ -1,41 +1,37 @@
 part of 'header_cubit.dart';
 
-abstract class HeaderState with EquatableMixin {}
+abstract class HeaderState {}
 
-class HeaderInitial extends HeaderState {
-  @override
-  List<Object?> get props => [];
-}
+class HeaderInitial extends HeaderState {}
 
-class HeaderInfoLoaded extends HeaderState {
-  HeaderInfoLoaded({
+class HeaderInfoChanged extends HeaderState {
+  HeaderInfoChanged({
     required this.tracks,
     required this.user,
     required this.selectedTrack,
+    this.adminActive = false,
   });
 
   final List<Track> tracks;
   final User user;
   final Track selectedTrack;
-
-  @override
-  List<Object?> get props => [tracks, user, selectedTrack];
+  final bool adminActive;
 }
 
-class HeaderTrackChanged extends HeaderInfoLoaded {
-  HeaderTrackChanged({
-    required List<Track> tracks,
-    required User user,
-    required Track selectedTrack,
-    this.selectedAdminConfig = -1,
-  }) : super(
-          tracks: tracks,
-          selectedTrack: selectedTrack,
-          user: user,
-        );
+// class HeaderInfoChanged extends HeaderInfoLoaded {
+//   HeaderInfoChanged({
+//     required List<Track> tracks,
+//     required User user,
+//     required Track selectedTrack,
+//     this.selectedAdminConfig = -1,
+//   }) : super(
+//           tracks: tracks,
+//           selectedTrack: selectedTrack,
+//           user: user,
+//         );
 
-  final int selectedAdminConfig;
+//   final int selectedAdminConfig;
 
-  @override
-  List<Object?> get props => [tracks, user, selectedTrack, selectedAdminConfig];
-}
+//   // @override
+//   // List<Object?> get props => [tracks, user, selectedTrack, selectedAdminConfig];
+// }

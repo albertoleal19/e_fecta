@@ -1,6 +1,5 @@
 import 'package:e_fecta/domain/entities/track.dart';
 import 'package:e_fecta/domain/entities/user.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:e_fecta/data/race_repository.dart';
 import 'package:e_fecta/data/user_repository.dart';
@@ -17,7 +16,7 @@ class HeaderCubit extends Cubit<HeaderState> {
   User? currentUser;
   List<Track> tracks = [];
   Track? selectedTrack;
-  int _selecteConfig = -1;
+  bool _adminActive = false;
 
   Future<void> loadInfo() async {
     final tracksResponse = await receRepository.getTracks();
@@ -27,7 +26,7 @@ class HeaderCubit extends Cubit<HeaderState> {
     selectedTrack = tracks.first;
     currentUser = user;
     emit(
-      HeaderInfoLoaded(
+      HeaderInfoChanged(
         tracks: tracks,
         user: user,
         selectedTrack: selectedTrack!,
@@ -40,23 +39,23 @@ class HeaderCubit extends Cubit<HeaderState> {
     _emitHeaderChangeState();
   }
 
-  Future<void> displayRaceConfiguraiton() async {
-    _selecteConfig = 0;
+  Future<void> displayRaceConfiguration() async {
+    _adminActive = true;
     _emitHeaderChangeState();
   }
 
   Future<void> leaveAdminMode() async {
-    _selecteConfig = -1;
+    _adminActive = false;
     _emitHeaderChangeState();
   }
 
   _emitHeaderChangeState() {
     emit(
-      HeaderTrackChanged(
+      HeaderInfoChanged(
         tracks: tracks,
         selectedTrack: selectedTrack!,
         user: currentUser!,
-        selectedAdminConfig: _selecteConfig,
+        adminActive: _adminActive,
       ),
     );
   }

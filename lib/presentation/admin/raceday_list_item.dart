@@ -1,9 +1,11 @@
 import 'package:e_fecta/core/app_colors.dart';
 import 'package:e_fecta/core/size_contants.dart';
 import 'package:e_fecta/domain/entities/raceday.dart';
+import 'package:e_fecta/presentation/admin/bloc/cubit/admin_cubit.dart';
 import 'package:e_fecta/presentation/common/horse_option.dart';
 import 'package:e_fecta/presentation/common/race/race.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class RaceListItem extends StatelessWidget {
@@ -24,6 +26,7 @@ class RaceListItem extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               RacedayGeneralInfo(
+                racedayId: raceday.id,
                 closingTime: raceday.closingTime,
                 tokensPerTicket: raceday.tokensPerTicket,
                 isOpen: raceday.isOpen,
@@ -46,9 +49,11 @@ class RacedayGeneralInfo extends StatelessWidget {
     Key? key,
     required this.closingTime,
     required this.tokensPerTicket,
+    required this.racedayId,
     this.isOpen = false,
   }) : super(key: key);
   final DateTime closingTime;
+  final String racedayId;
   final int tokensPerTicket;
   final bool isOpen;
 
@@ -59,6 +64,7 @@ class RacedayGeneralInfo extends StatelessWidget {
   Widget build(BuildContext context) {
     final double width = MediaQuery.sizeOf(context).width;
     final isCompressedScreen = width < WindowSizeContants.compact;
+    final cubit = context.read<AdminCubit>();
     if (isCompressedScreen) {
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -71,10 +77,59 @@ class RacedayGeneralInfo extends StatelessWidget {
                 Text(closingTimeString),
                 Expanded(child: Container()),
                 IconButton(
-                    onPressed: () => {},
-                    icon: Icon(isOpen
-                        ? FontAwesomeIcons.lock
-                        : FontAwesomeIcons.unlock)),
+                  onPressed: () => {
+                    showDialog(
+                      context: context,
+                      builder: (context) {
+                        return AlertDialog(
+                          title: Text(
+                              '''${isOpen ? 'Cerrar' : 'Abrir'} Polla ($racedayId)'''),
+                          content: Text(
+                            isOpen
+                                ? 'Al cerrar la polla, no se permitira crear mas tickets'
+                                : 'Al  abrir la polla,  se permitirá la creación de tickets.',
+                          ),
+                          actions: <Widget>[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                textStyle:
+                                    Theme.of(context).textTheme.labelLarge,
+                              ),
+                              child: const Text('Cancelar'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                textStyle:
+                                    Theme.of(context).textTheme.labelLarge,
+                              ),
+                              child: const Text('Corfirmar'),
+                              onPressed: () async {
+                                // perform action
+                                await cubit.changeRacedayStatus(
+                                  !isOpen,
+                                  racedayId,
+                                );
+                                if (!context.mounted) return;
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  },
+                  icon: Icon(
+                    isOpen ? FontAwesomeIcons.lock : FontAwesomeIcons.unlock,
+                  ),
+                ),
+                const VerticalDivider(),
+                IconButton(
+                  onPressed: () => cubit.showEditTicketSection(racedayId),
+                  icon: const Icon(FontAwesomeIcons.penToSquare),
+                ),
                 const VerticalDivider(),
                 IconButton(
                   onPressed: () => {},
@@ -97,10 +152,60 @@ class RacedayGeneralInfo extends StatelessWidget {
           Text('$tokensPerTicket Tokens x Ticket'),
           Expanded(child: Container()),
           TextButton(
-              onPressed: () => {}, child: Text(isOpen ? 'Cerrar' : 'Abrir')),
+            onPressed: () => {
+              showDialog(
+                context: context,
+                builder: (context) {
+                  return AlertDialog(
+                    title: Text(
+                        '''${isOpen ? 'Cerrar' : 'Abrir'} Polla ($racedayId)'''),
+                    content: Text(
+                      isOpen
+                          ? 'Al cerrar la polla, no se permitira crear mas tickets'
+                          : 'Al  abrir la polla,  se permitirá la creación de tickets.',
+                    ),
+                    actions: <Widget>[
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('Cancelar'),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                          textStyle: Theme.of(context).textTheme.labelLarge,
+                        ),
+                        child: const Text('Corfirmar'),
+                        onPressed: () async {
+                          // perform action
+                          await cubit.changeRacedayStatus(
+                            !isOpen,
+                            racedayId,
+                          );
+                          if (!context.mounted) return;
+                          Navigator.of(context).pop();
+                        },
+                      ),
+                    ],
+                  );
+                },
+              ),
+            },
+            child: Text(isOpen ? 'Cerrar' : 'Abrir'),
+          ),
           const VerticalDivider(),
           TextButton(
-              onPressed: () => {}, child: const Text('Indicar Ganadores')),
+            onPressed: () => cubit.showEditTicketSection(racedayId),
+            child: const Text('Editar'),
+          ),
+          const VerticalDivider(),
+          TextButton(
+            onPressed: () => {},
+            child: const Text('Indicar Ganadores'),
+          ),
         ],
       ),
     );

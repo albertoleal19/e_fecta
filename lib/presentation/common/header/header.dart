@@ -10,12 +10,15 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    // context.read<PlaysCubit>().getRacedayConfig();
+    final cubit = context.read<HeaderCubit>();
     return BlocConsumer<HeaderCubit, HeaderState>(
       listener: (context, state) {
-        if (state is HeaderInfoLoaded) {
-          context.read<PlaysCubit>().setTrack(state.selectedTrack.id);
-          context.read<AdminCubit>().setTrack(state.selectedTrack.id);
+        if (state is HeaderInfoChanged) {
+          if (state.adminActive) {
+            context.read<AdminCubit>().setTrack(state.selectedTrack.id);
+          } else {
+            context.read<PlaysCubit>().setTrack(state.selectedTrack.id);
+          }
         }
       },
       builder: (context, state) {
@@ -26,7 +29,7 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               const SizedBox(
                 width: 50,
               ),
-              if (state is HeaderInfoLoaded) ...{
+              if (state is HeaderInfoChanged) ...{
                 DropdownButton<String>(
                   value: state.selectedTrack.id,
                   onChanged: (newValue) {
@@ -40,67 +43,49 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                       child: Text(track.name),
                     );
                   }).toList(),
-                ),
-              },
-
-              // BlocBuilder<HeaderCubit, HeaderState>(
-              //   builder: (context, state) {
-              //     if (state is HeaderInfoLoaded) {
-              //       return Wrap(
-              //         spacing: 6,
-              //         children: [
-              //           ...state.tracks.map((e) => Chip(label: Text(e.name)))
-              //         ],
-              //         // children: const [
-              //         //   Chip(label: Text('Gulfstream Park')),
-              //         //   Chip(label: Text('La Rinconada'))
-              //         // ],
-              //       );
-              //     }
-              //     return Container();
-              //   },
-              // )
-              // Expanded(
-              //   child: ListView(
-              //     scrollDirection: Axis.horizontal,
-              //     children: const [
-              //       Chip(label: Text('Gulfstream Park')),
-              //       Chip(label: Text('La Rinconada'))
-              //     ],
-              //   ),
-              // ),
+                )
+              }
             ],
           ),
-          // bottom: PreferredSize(
-          //   preferredSize: const Size.fromHeight(kToolbarHeight),
-          //   child: ListView(
-          //     scrollDirection: Axis.horizontal,
-          //     children: const [
-          //       Chip(label: Text('Gulfstream Park')),
-          //       Chip(label: Text('La Rinconada'))
-          //     ],
-          //   ),
-          // ),
           actions: [
-            if (state is HeaderInfoLoaded) ...{
-              Center(
-                child: Text(
-                  '\$ ${state.user.tokens}',
+            if (state is HeaderInfoChanged) ...{
+              Padding(
+                padding: const EdgeInsets.only(right: 30.0),
+                child: Center(
+                  child: Text(
+                    'Tokens: ${state.user.tokens}',
+                  ),
                 ),
               ),
             },
-            const SizedBox(
-              width: 30,
-            ),
-            GestureDetector(
-              // onTap: () =>
-              //     context.read<HeaderCubit>().displayRaceConfiguraiton(),
-              onTap: () => Scaffold.of(context).openEndDrawer(),
-              child: const SizedBox(
-                width: 50,
-                child: Icon(Icons.account_circle_rounded),
+            if (state is HeaderInfoChanged && state.user.isAdmin) ...{
+              Padding(
+                padding: const EdgeInsets.only(right: 30.0),
+                child: TextButton(
+                  onPressed: () {
+                    if (state.adminActive) {
+                      cubit.leaveAdminMode();
+                    } else {
+                      cubit.displayRaceConfiguration();
+                    }
+                  },
+                  child: Text(
+                    state.adminActive
+                        ? 'Salir del Administrador'
+                        : 'Modo Administrador',
+                  ),
+                ),
               ),
-            ),
+            },
+            // GestureDetector(
+            //   // onTap: () =>
+            //   //     context.read<HeaderCubit>().displayRaceConfiguraiton(),
+            //   onTap: () => Scaffold.of(context).openEndDrawer(),
+            //   child: const SizedBox(
+            //     width: 50,
+            //     child: Icon(Icons.account_circle_rounded),
+            //   ),
+            // ),
           ],
         );
       },

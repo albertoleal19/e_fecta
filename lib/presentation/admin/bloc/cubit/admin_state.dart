@@ -1,21 +1,41 @@
 part of 'admin_cubit.dart';
 
-class AdminState extends Equatable {
-  const AdminState();
+enum AdminSection { newTicket, editTicket }
 
-  @override
-  List<Object> get props => [];
+class AdminState {
+  const AdminState();
 }
 
 class AdminInitial extends AdminState {}
 
-class AdminInputErrorState extends AdminState {}
+class AdminInputErrorState extends AdminState {
+  AdminInputErrorState({this.message = ''});
+  final String message;
+}
+
+class AdminNewRacedaySectionShownState extends AdminState {
+  const AdminNewRacedaySectionShownState({
+    required this.raceday,
+  });
+
+  final Raceday raceday;
+}
+
+class AdminEditRacedaySectionShownState extends AdminState {
+  const AdminEditRacedaySectionShownState({
+    required this.raceday,
+  });
+
+  final Raceday raceday;
+  // @override
+  // List<Object> get props => [optionsToDisplay];
+}
 
 class AdminConfiguredRacedaysLoaded extends AdminState {
   const AdminConfiguredRacedaysLoaded({required this.racedays});
 
   final List<Raceday> racedays;
 
-  @override
-  List<Object> get props => [racedays];
+  // @override
+  // List<Object> get props => [racedays];
 }

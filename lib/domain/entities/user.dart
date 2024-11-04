@@ -6,13 +6,15 @@ class User with EquatableMixin {
     required this.username,
     required this.email,
     required this.tokens,
+    this.isAdmin = true,
   });
 
   final int id;
   final String username;
   final String email;
   final double tokens;
+  final bool isAdmin;
 
   @override
-  List<Object?> get props => [id, username, email, tokens];
+  List<Object?> get props => [id, username, email, tokens, isAdmin];
 }

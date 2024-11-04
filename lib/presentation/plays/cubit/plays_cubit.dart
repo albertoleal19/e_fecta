@@ -34,8 +34,10 @@ class PlaysCubit extends Cubit<PlaysState> {
   }
 
   Future<void> setTrack(String trackId) async {
-    _trackId = trackId;
-    _loadConfigurationInfo();
+    if (_trackId != trackId) {
+      _trackId = trackId;
+      _loadConfigurationInfo();
+    }
   }
 
   void togglePlaysSelections() {
@@ -184,11 +186,15 @@ class PlaysCubit extends Cubit<PlaysState> {
   void _loadConfigurationInfo() async {
     _currentUser = await userRepository.getUser();
     _racedayInfo = await receRepository.getRecedayInfo(_trackId);
-    emit(PlaysRacesConfigLoaded(
-      racesOptions: _racedayInfo.racesOptions,
-      ticketsCount: ticketsCount,
-      tokenCounts: tokensCount,
-    ));
+    emit(
+      PlaysRacesConfigLoaded(
+        racesOptions: <List<int>>[],
+
+        ///_racedayInfo.racesOptions,
+        ticketsCount: ticketsCount,
+        tokenCounts: tokensCount,
+      ),
+    );
   }
 
   List<List<int>> _generateCombinations(List<List<int>> selectedOptions) {

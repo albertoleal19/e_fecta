@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_fecta/domain/entities/raceday.dart';
 import 'package:e_fecta/domain/entities/track.dart';
@@ -21,6 +23,7 @@ class RaceRepositoryImpl implements RaceRepository {
 
       return Future.value(
         Raceday(
+          id: raceday.id,
           trackId: trackId,
           tokensPerTicket: raceday['ticketCost'],
           closingTime: DateTime.fromMillisecondsSinceEpoch(
@@ -44,10 +47,47 @@ class RaceRepositoryImpl implements RaceRepository {
   }
 
   @override
-  Future<bool> createRaceday(Raceday raceday) async {
-    final racedayToSend = raceday.toJson();
-    await firestore.collection('racedays').add(racedayToSend);
-    return Future.value(true);
+  Future<Raceday?> createRaceday(Raceday raceday) async {
+    try {
+      for (var element in raceday.racesOptions) {
+        element.sort();
+      }
+      final racedayToSend = raceday.toJson();
+      final racedayDocRef =
+          await firestore.collection('racedays').add(racedayToSend);
+      return Future.value(raceday.copyWith(id: racedayDocRef.id));
+    } catch (e) {
+      return Future.value(null);
+    }
+  }
+
+  @override
+  Future<bool> editRaceday(Raceday raceday) async {
+    try {
+      for (var element in raceday.racesOptions) {
+        element.sort();
+      }
+      final racedayToSend = raceday.toJson();
+      await firestore
+          .collection('racedays')
+          .doc(raceday.id)
+          .update(racedayToSend);
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
+  }
+
+  @override
+  Future<bool> setWinners(String racedayId, List<int> winners, int race) async {
+    try {
+      await firestore.collection('racedays').doc(racedayId).update({
+        'winners': {'$race': winners}
+      });
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
   }
 
   @override
@@ -60,11 +100,12 @@ class RaceRepositoryImpl implements RaceRepository {
 
     final List<Raceday> racedays = [];
 
-    for (var raceday in racedayResult.docs.map((e) => e.data()).toList()) {
-      List<List<int>> options = _mapRaces(raceday);
+    for (var raceday in racedayResult.docs.map((e) => e).toList()) {
+      List<List<int>> options = _mapRaces(raceday['races']);
 
       racedays.add(
         Raceday(
+          id: raceday.id,
           trackId: trackId,
           tokensPerTicket: raceday['ticketCost'],
           closingTime: DateTime.fromMillisecondsSinceEpoch(
@@ -79,25 +120,75 @@ class RaceRepositoryImpl implements RaceRepository {
   }
 
   List<List<int>> _mapRaces(Map<String, dynamic> racedayJson) {
-    return [
-      (racedayJson['race1'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-      (racedayJson['race2'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-      (racedayJson['race3'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-      (racedayJson['race4'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-      (racedayJson['race5'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-      (racedayJson['race6'] as List<dynamic>)
-          .map((e) => int.parse(e.toString()))
-          .toList(),
-    ];
+    try {
+      List<List<int>> options = [];
+      for (var i = 1; i < 7; i++) {
+        options.add((racedayJson['$i'] as List<dynamic>)
+            .map((e) => int.parse(e.toString()))
+            .toList());
+      }
+      for (var element in options) {
+        element.sort();
+      }
+      return options;
+    } catch (ex) {
+      return List.generate(6, (index) => []);
+    }
+
+    // return [
+    //   (racedayJson['race1'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race2'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race3'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race4'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race5'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race6'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    // ];
+
+    // return [
+    //   (racedayJson['race1'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race2'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race3'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race4'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race5'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    //   (racedayJson['race6'] as List<dynamic>)
+    //       .map((e) => int.parse(e.toString()))
+    //       .toList(),
+    // ];
+  }
+
+  @override
+  Future<bool> updateRecedayStatusForAdmin(
+      String racedayId, bool isOpen) async {
+    try {
+      final response = await firestore
+          .collection('racedays')
+          .doc(racedayId)
+          .update({'opened': isOpen});
+      return Future.value(true);
+    } catch (e) {
+      return Future.value(false);
+    }
   }
 }
