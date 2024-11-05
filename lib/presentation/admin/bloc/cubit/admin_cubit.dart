@@ -1,6 +1,8 @@
 import 'package:e_fecta/data/race_repository.dart';
+import 'package:e_fecta/data/ticket_repository.dart';
 import 'package:e_fecta/domain/entities/raceday.dart';
 import 'package:e_fecta/domain/repositories/race_repository.dart';
+import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'admin_state.dart';
@@ -9,6 +11,7 @@ class AdminCubit extends Cubit<AdminState> {
   AdminCubit() : super(AdminInitial());
 
   final RaceRepository raceRepository = RaceRepositoryImpl();
+  final TicketRepository ticketRepository = TicketRepositoryImpl();
 
   String _trackId = '';
 
@@ -159,6 +162,10 @@ class AdminCubit extends Cubit<AdminState> {
 
       emit(AdminConfiguredRacedaysLoaded(racedays: _racedays));
     }
+  }
+
+  Future<void> setWinners(String racedayId) async {
+    await ticketRepository.updateTickets(racedayId, 6, 3, 5);
   }
 
   Future<void> loadRacedaysInfo() async {

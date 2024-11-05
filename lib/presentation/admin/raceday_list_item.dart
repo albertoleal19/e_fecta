@@ -34,7 +34,7 @@ class RaceListItem extends StatelessWidget {
               const SizedBox(height: 20),
               RacesConfig(
                 options: raceday.racesOptions,
-                // winners: raceday.winners,
+                winners: raceday.winners,
               ),
             ],
           );
@@ -203,7 +203,7 @@ class RacedayGeneralInfo extends StatelessWidget {
           ),
           const VerticalDivider(),
           TextButton(
-            onPressed: () => {},
+            onPressed: () => cubit.setWinners(racedayId),
             child: const Text('Indicar Ganadores'),
           ),
         ],

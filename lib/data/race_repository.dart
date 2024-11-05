@@ -112,7 +112,14 @@ class RaceRepositoryImpl implements RaceRepository {
               raceday['closingDateTime'].millisecondsSinceEpoch),
           racesOptions: options,
           isOpen: raceday['opened'] ?? false,
-          winners: const [],
+          winners: const [
+            [1, 2, 4],
+            [1, 2, 4],
+            [1, 2, 4],
+            [1, 2, 4],
+            [1, 2, 4],
+            [1, 2, 4]
+          ],
         ),
       );
     }
