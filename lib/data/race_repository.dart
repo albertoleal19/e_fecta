@@ -8,7 +8,7 @@ import 'package:e_fecta/domain/repositories/race_repository.dart';
 class RaceRepositoryImpl implements RaceRepository {
   final firestore = FirebaseFirestore.instance;
   @override
-  Future getRecedayInfo(String trackId) async {
+  Future<Raceday?> getRecedayInfo(String trackId) async {
     final racedayResult = await firestore
         .collection('racedays')
         .where('trackId', isEqualTo: trackId)
@@ -19,21 +19,20 @@ class RaceRepositoryImpl implements RaceRepository {
         .get();
     if (racedayResult.docs.isNotEmpty) {
       final raceday = racedayResult.docs.first;
-      List<List<int>> options = _mapRaces(raceday.data());
+      List<List<int>> options = _mapRaces(raceday.data()['races']);
 
-      return Future.value(
-        Raceday(
-          id: raceday.id,
-          trackId: trackId,
-          tokensPerTicket: raceday['ticketCost'],
-          closingTime: DateTime.fromMillisecondsSinceEpoch(
-              raceday['closingDateTime'].millisecondsSinceEpoch),
-          racesOptions: options,
-          isOpen: raceday['opened'],
-          winners: const [],
-        ),
+      return Raceday(
+        id: raceday.id,
+        trackId: trackId,
+        tokensPerTicket: raceday['ticketCost'],
+        closingTime: DateTime.fromMillisecondsSinceEpoch(
+            raceday['closingDateTime'].millisecondsSinceEpoch),
+        racesOptions: options,
+        isOpen: raceday['opened'],
+        winners: const [],
       );
     }
+    return null;
   }
 
   @override
@@ -126,11 +125,11 @@ class RaceRepositoryImpl implements RaceRepository {
     return racedays;
   }
 
-  List<List<int>> _mapRaces(Map<String, dynamic> racedayJson) {
+  List<List<int>> _mapRaces(Map<String, dynamic> racedayRacesJson) {
     try {
       List<List<int>> options = [];
       for (var i = 1; i < 7; i++) {
-        options.add((racedayJson['$i'] as List<dynamic>)
+        options.add((racedayRacesJson['$i'] as List<dynamic>)
             .map((e) => int.parse(e.toString()))
             .toList());
       }

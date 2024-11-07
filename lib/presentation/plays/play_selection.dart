@@ -49,9 +49,43 @@ class _PlaySelectionState extends State<PlaySelection> {
                 state is PlaysRacesConfigLoaded) {
               final selection =
                   state is PlaysChangeState ? state.selectedHourses : [];
+              var tokensPerTicket = 1;
+              DateTime? closingTime;
+
+              if (state is PlaysRacesConfigLoaded) {
+                tokensPerTicket = state.tokensPerTicket;
+                closingTime = state.closingTime;
+              } else {
+                tokensPerTicket =
+                    (state as PlaysSelectionChanged).tokensPerTicket;
+                closingTime = (state).closingTime;
+              }
+
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  SizedBox(
+                    height: 30,
+                    child: Expanded(
+                      child: Row(
+                        mainAxisAlignment: isCompressedView
+                            ? MainAxisAlignment.start
+                            : MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Programada para: ${closingTime.year}/${closingTime.month}/${closingTime.day}',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                          const VerticalDivider(),
+                          Text(
+                            '$tokensPerTicket Tokens x ticket',
+                            style: const TextStyle(fontSize: 14),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   const Text(
                     'Selecciona tus opciones por carrera.',
                     style: TextStyle(fontSize: 14),
@@ -142,30 +176,6 @@ class _PlaySelectionState extends State<PlaySelection> {
                 ],
               );
             } else if (state is PlaysSummary) {
-              // return ListView.separated(
-
-              //   physics: const ClampingScrollPhysics(),
-              //   itemBuilder: (context, index) {
-              //     return Row(
-              //       mainAxisSize: MainAxisSize.min,
-              //       crossAxisAlignment: CrossAxisAlignment.start,
-              //       children: [
-              //         SizedBox(
-              //           width: 50,
-              //           child: Text(
-              //             '${index + 1}',
-              //             style: const TextStyle(
-              //               fontSize: 14,
-              //             ),
-              //           ),
-              //         ),
-              //         TicketInfo(options: state.tickets[index])
-              //       ],
-              //     );
-              //   },
-              //   itemCount: state.tickets.length,
-              //   separatorBuilder: (context, index) => const Divider(),
-              // );
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [

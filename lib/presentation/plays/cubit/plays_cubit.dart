@@ -1,10 +1,14 @@
 import 'package:e_fecta/data/race_repository.dart';
+import 'package:e_fecta/data/ticket_repository.dart';
 import 'package:e_fecta/data/user_repository.dart';
 import 'package:e_fecta/domain/entities/raceday.dart';
+import 'package:e_fecta/domain/entities/ticket.dart';
 import 'package:e_fecta/domain/entities/user.dart';
 import 'package:e_fecta/domain/repositories/race_repository.dart';
+import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 import 'package:e_fecta/domain/repositories/user_repository.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'plays_state.dart';
@@ -17,10 +21,11 @@ class PlaysCubit extends Cubit<PlaysState> {
   int tokensCount = 0;
 
   late User _currentUser;
-  late Raceday _racedayInfo;
+  Raceday? _racedayInfo;
 
   final UserRepository userRepository = UserRepositoryImpl();
-  final RaceRepository receRepository = RaceRepositoryImpl();
+  final RaceRepository raceRepository = RaceRepositoryImpl();
+  final TicketRepository ticketRepository = TicketRepositoryImpl();
 
   bool _playSelectionpOpened = false;
   String _trackId = '';
@@ -66,6 +71,8 @@ class PlaysCubit extends Cubit<PlaysState> {
           tokenCounts: preliminaryTicketsCount * 2,
           ticketsCount: preliminaryTicketsCount,
           exceededTokens: true,
+          tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
+          closingTime: _racedayInfo!.closingTime,
         ),
       );
     } else {
@@ -79,7 +86,7 @@ class PlaysCubit extends Cubit<PlaysState> {
 
       ticketsCount = preliminaryTicketsCount;
 
-      tokensCount = 2 * ticketsCount;
+      tokensCount = (_racedayInfo?.tokensPerTicket ?? 1) * ticketsCount;
 
       emit(
         PlaysSelectionChanged(
@@ -89,20 +96,17 @@ class PlaysCubit extends Cubit<PlaysState> {
           tokenCounts: tokensCount,
           ticketsCount: ticketsCount,
           exceededTokens: false,
+          tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
+          closingTime: _racedayInfo!.closingTime,
         ),
       );
     }
-
-    print(playSelection);
-    print('---------------------');
-    print(
-      'Tickets:  $ticketsCount  --- Tokens: $tokensCount --- Race: $race -- ValidPlay: ${_isValidPlay()}',
-    );
   }
 
   Future<void> getRacedayConfig() async {
     _loadConfigurationInfo();
   }
+
   // Future<void> nextStep() async {
   //   step++;
   //   print('Step: $step');
@@ -149,6 +153,8 @@ class PlaysCubit extends Cubit<PlaysState> {
         tokenCounts: tokensCount,
         ticketsCount: ticketsCount,
         exceededTokens: false,
+        tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
+        closingTime: _racedayInfo!.closingTime,
       ),
     );
   }
@@ -172,29 +178,59 @@ class PlaysCubit extends Cubit<PlaysState> {
   }
 
   Future<void> sealTicket() async {
-    print('------------- Send tickets to server --------------');
+    if (state is PlaysSummary && _racedayInfo != null) {
+      final List<Ticket> tickets = (state as PlaysSummary)
+          .tickets
+          .map(
+            (ticketOptions) => Ticket(
+              racedayId: _racedayInfo?.id ?? '',
+              selectedOptions: ticketOptions,
+            ),
+          )
+          .toList();
+      debugPrint('------------- Send tickets to server --------------');
+      final newBalace = await ticketRepository.sealTickets(
+        tickets,
+        _currentUser,
+        _racedayInfo?.tokensPerTicket ?? 1,
+      );
 
-    playSelection = [{}, {}, {}, {}, {}, {}];
-    tokensCount = 0;
-    ticketsCount = 0;
-    _playSelectionpOpened = false;
-    emit(
-      TogglePlaysSelectionState(_playSelectionpOpened),
-    );
+      playSelection = [{}, {}, {}, {}, {}, {}];
+      tokensCount = 0;
+      ticketsCount = 0;
+      _playSelectionpOpened = false;
+      if (newBalace != null) {
+        emit(PlaysFinished(newBalance: newBalace));
+      }
+
+      emit(TogglePlaysSelectionState(_playSelectionpOpened));
+      // emit(PlaysInitial());
+    } else {
+      debugPrint('Error: Previous state is not PlaysSummary');
+    }
   }
 
   void _loadConfigurationInfo() async {
-    _currentUser = await userRepository.getUser();
-    _racedayInfo = await receRepository.getRecedayInfo(_trackId);
-    emit(
-      PlaysRacesConfigLoaded(
-        racesOptions: <List<int>>[],
-
-        ///_racedayInfo.racesOptions,
-        ticketsCount: ticketsCount,
-        tokenCounts: tokensCount,
-      ),
-    );
+    final authUser = await userRepository.getAuthenticatedUser();
+    if (authUser == null) {
+      //emit(error to handle auth);
+    } else {
+      _currentUser = authUser;
+    }
+    _racedayInfo = await raceRepository.getRecedayInfo(_trackId);
+    if (_racedayInfo != null) {
+      emit(
+        PlaysRacesConfigLoaded(
+          racesOptions: _racedayInfo!.racesOptions,
+          ticketsCount: ticketsCount,
+          tokenCounts: tokensCount,
+          tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
+          closingTime: _racedayInfo!.closingTime,
+        ),
+      );
+    } else {
+      emit(const PlaysNotAvailable());
+    }
   }
 
   List<List<int>> _generateCombinations(List<List<int>> selectedOptions) {

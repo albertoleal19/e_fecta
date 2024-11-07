@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:e_fecta/domain/entities/ticket.dart';
+import 'package:e_fecta/domain/entities/user.dart';
 import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 
 class TicketRepositoryImpl implements TicketRepository {
@@ -10,35 +12,42 @@ class TicketRepositoryImpl implements TicketRepository {
   }
 
   @override
-  Future sealTickets(List tickets, String recedayId) async {
+  Future<int?> sealTickets(
+    List<Ticket> tickets,
+    User user,
+    int tokensPerTicket,
+  ) async {
+    int? newBalance;
     try {
-      for (var ticket in tickets) {
+      for (Ticket ticket in tickets) {
         Map<String, dynamic> ticketToSend = {};
         for (var i = 0; i < 6; i++) {
-          ticketToSend['race${i + 1}'] = (ticket['options'] as List<int>)[i];
+          ticketToSend['race${i + 1}'] = ticket.selectedOptions[i];
           ticketToSend['pts${i + 1}'] = 0;
         }
-        // ticketToSend['race1'] = (ticket['options'] as List<int>)[0];
-        // ticketToSend['race2'] = (ticket['options'] as List<int>)[1];
-        // ticketToSend['race3'] = (ticket['options'] as List<int>)[2];
-        // ticketToSend['race4'] = (ticket['options'] as List<int>)[3];
-        // ticketToSend['race5'] = (ticket['options'] as List<int>)[4];
-        // ticketToSend['race6'] = (ticket['options'] as List<int>)[5];
 
-        // ticketToSend['pts1'] = 0;
-        // ticketToSend['pts2'] = 0;
-        // ticketToSend['pts3'] = 0;
-        // ticketToSend['pts4'] = 0;
-        // ticketToSend['pts5'] = 0;
-        // ticketToSend['pts6'] = 0;
         ticketToSend['totalPts'] = 0;
-        ticketToSend['racedayId'] = recedayId;
-        ticketToSend['userId'] = ticket['userId'];
-        await firestore.collection('tickets').add(ticketToSend);
+        ticketToSend['racedayId'] = ticket.racedayId;
+        ticketToSend['userId'] = user.id;
+        ticketToSend['username'] = user.username;
+        ticketToSend['timestamp'] = FieldValue.serverTimestamp();
+        final userRef = firestore.collection('users').doc(user.id);
+        final ticketRef = firestore.collection('tickets').doc();
+        newBalance = await firestore.runTransaction((transaction) async {
+          final currentBalance =
+              (await transaction.get(userRef)).get('balance');
+          transaction.set(ticketRef, ticketToSend);
+          transaction.update(userRef, {
+            'balance': FieldValue.increment(-tokensPerTicket),
+          });
+
+          return currentBalance - tokensPerTicket;
+        });
+        // await firestore.collection('tickets').add(ticketToSend);
       }
-      return Future.value(true);
+      return Future.value(newBalance);
     } catch (e) {
-      return Future.value(false);
+      rethrow;
     }
   }
 

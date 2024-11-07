@@ -1,5 +1,9 @@
+import 'package:e_fecta/domain/entities/ticket.dart';
+import 'package:e_fecta/domain/entities/user.dart';
+
 abstract class TicketRepository {
-  Future<dynamic> sealTickets(List<dynamic> tickets, String racedayId);
+  Future<int?> sealTickets(
+      List<Ticket> tickets, User user, int tokensPerTicket);
 
   Future<dynamic> getTickets();
 

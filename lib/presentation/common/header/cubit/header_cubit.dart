@@ -20,7 +20,7 @@ class HeaderCubit extends Cubit<HeaderState> {
 
   Future<void> loadInfo() async {
     final tracksResponse = await receRepository.getTracks();
-    final user = await userRepository.getUser();
+    final user = await userRepository.authenticate('', '');
 
     tracks = tracksResponse;
     selectedTrack = tracks.first;
@@ -46,6 +46,11 @@ class HeaderCubit extends Cubit<HeaderState> {
 
   Future<void> leaveAdminMode() async {
     _adminActive = false;
+    _emitHeaderChangeState();
+  }
+
+  Future<void> updateBalance(int newBalace) async {
+    currentUser = currentUser?.copyWith(tokens: newBalace);
     _emitHeaderChangeState();
   }
 

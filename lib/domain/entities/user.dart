@@ -9,12 +9,27 @@ class User with EquatableMixin {
     this.isAdmin = true,
   });
 
-  final int id;
+  final String id;
   final String username;
   final String email;
-  final double tokens;
+  final int tokens;
   final bool isAdmin;
 
   @override
   List<Object?> get props => [id, username, email, tokens, isAdmin];
+
+  User copyWith({
+    String? id,
+    String? username,
+    String? email,
+    int? tokens,
+    bool? isAdmin,
+  }) =>
+      User(
+        id: id ?? this.id,
+        username: username ?? this.username,
+        email: email ?? this.email,
+        tokens: tokens ?? this.tokens,
+        isAdmin: isAdmin ?? this.isAdmin,
+      );
 }

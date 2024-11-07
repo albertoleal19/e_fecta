@@ -23,7 +23,7 @@ class PlayScreen extends StatelessWidget {
           children: [
             const DrawerHeader(
               decoration: BoxDecoration(color: AppColors.darkGreen),
-              child: Text('Administracions'),
+              child: Text('Administracion'),
             ),
             ListTile(
               title: const Text('Configurar carreras'),
@@ -67,31 +67,48 @@ class PlayScreen extends StatelessWidget {
                   builder: (context, headerState) {
                     if (headerState is HeaderInfoChanged &&
                         headerState.adminActive) {
-                      // context.read<PlaysCubit>().setPlayActive(false);
-                      // context.read<AdminCubit>().setAdminActive(true);
                       return const AdminScreen();
                     }
                     return BlocBuilder<PlaysCubit, PlaysState>(
                       buildWhen: (previous, current) =>
-                          current is TogglePlaysSelectionState,
+                          current is TogglePlaysSelectionState ||
+                          current is PlaysNotAvailable,
                       builder: (context, state) {
                         final playSelectionOpened =
                             state is TogglePlaysSelectionState && state.opened;
                         return Column(
                           children: [
-                            Padding(
-                              padding: playSelectionOpened
-                                  ? const EdgeInsets.only(top: 20)
-                                  : const EdgeInsets.all(20),
-                              child: ElevatedButton(
-                                onPressed: context
-                                    .read<PlaysCubit>()
-                                    .togglePlaysSelections,
-                                child: Text(playSelectionOpened
-                                    ? 'Cerrar'
-                                    : 'Seleccionar Apuesta'),
+                            if (state is PlaysNotAvailable) ...{
+                              Padding(
+                                padding: const EdgeInsets.all(20),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: AppColors.errorRed,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 30, vertical: 10),
+                                  child: const Text(
+                                    '*** No hay jornadas disponibles por los momentos ***',
+                                  ),
+                                ),
                               ),
-                            ),
+                            },
+                            if (state is! PlaysNotAvailable) ...{
+                              Padding(
+                                padding: playSelectionOpened
+                                    ? const EdgeInsets.only(top: 20)
+                                    : const EdgeInsets.all(20),
+                                child: ElevatedButton(
+                                  onPressed: context
+                                      .read<PlaysCubit>()
+                                      .togglePlaysSelections,
+                                  child: Text(playSelectionOpened
+                                      ? 'Cerrar'
+                                      : 'Seleccionar Apuesta'),
+                                ),
+                              ),
+                            },
                             if (playSelectionOpened) ...[
                               const PlaySelection(),
                             ],
