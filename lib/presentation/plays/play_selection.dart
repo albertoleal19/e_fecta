@@ -310,8 +310,10 @@ class _SummaryList extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                              child:
-                                  TicketInfo2(options: state.tickets[index])),
+                              child: TicketInfo2(
+                            options: state.tickets[index],
+                            showPtsRow: false,
+                          )),
                           const SizedBox(
                             width: 12,
                           ),

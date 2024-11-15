@@ -1,4 +1,5 @@
 import 'package:e_fecta/core/app_colors.dart';
+import 'package:e_fecta/domain/entities/ticket.dart';
 import 'package:e_fecta/presentation/admin/admin_screen.dart';
 import 'package:e_fecta/presentation/admin/bloc/cubit/admin_cubit.dart';
 import 'package:e_fecta/presentation/common/header/cubit/header_cubit.dart';
@@ -6,6 +7,7 @@ import 'package:e_fecta/presentation/common/header/header.dart';
 import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:e_fecta/presentation/plays/play_selection.dart';
 import 'package:e_fecta/presentation/results/result_list_item.dart';
+import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -128,6 +130,38 @@ class PlayScreen extends StatelessWidget {
                                       style: TextStyle(fontSize: 64),
                                     ),
                                   ),
+                                  BlocBuilder<PlaysCubit, PlaysState>(
+                                    buildWhen: (previous, current) =>
+                                        current is PlaysTicketsDisplay,
+                                    builder: (context, state) {
+                                      if (state is PlaysTicketsDisplay) {
+                                        return Container(
+                                          padding: const EdgeInsets.only(
+                                            left: 20.0,
+                                            right: 20.0,
+                                            bottom: 50,
+                                          ),
+                                          child: Center(
+                                            child: Row(
+                                              children: [
+                                                const Text('Pollas Jugadas'),
+                                                const SizedBox(width: 40),
+                                                Text(
+                                                  '${state.ticketsCount}',
+                                                  style: const TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 24,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return const SizedBox.shrink();
+                                      }
+                                    },
+                                  ),
                                   Center(
                                     child: Container(
                                       color: AppColors.darkBlue,
@@ -159,24 +193,38 @@ class PlayScreen extends StatelessWidget {
                                             child: BlocBuilder<PlaysCubit,
                                                 PlaysState>(
                                               buildWhen: (previous, current) =>
-                                                  current is PlaysTicketsLoaded,
+                                                  current
+                                                      is PlaysTicketsDisplay,
                                               builder: (context, state) {
                                                 if (state
-                                                    is PlaysTicketsLoaded) {
-                                                  return ListView.builder(
-                                                    physics:
-                                                        const ClampingScrollPhysics(),
+                                                    is PlaysTicketsDisplay) {
+                                                  return FirestoreListView<
+                                                      Ticket>(
+                                                    query: state.ticketsRef,
                                                     itemBuilder:
-                                                        (context, index) {
+                                                        (context, snapshot) {
+                                                      final ticket =
+                                                          snapshot.data();
                                                       return ResultListItem(
-                                                        ticket: state
-                                                            .tickets[index],
-                                                        position: index + 1,
+                                                        ticket: ticket,
+                                                        position: 1,
                                                       );
                                                     },
-                                                    itemCount:
-                                                        state.tickets.length,
                                                   );
+                                                  // return ListView.builder(
+                                                  //   physics:
+                                                  //       const ClampingScrollPhysics(),
+                                                  //   itemBuilder:
+                                                  //       (context, index) {
+                                                  //     return ResultListItem(
+                                                  //       ticket: state
+                                                  //           .tickets[index],
+                                                  //       position: index + 1,
+                                                  //     );
+                                                  //   },
+                                                  //   itemCount:
+                                                  //       state.tickets.length,
+                                                  // );
                                                 } else {
                                                   return const SizedBox
                                                       .shrink();

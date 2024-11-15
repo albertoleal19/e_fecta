@@ -3,6 +3,8 @@ import 'package:e_fecta/domain/entities/ticket.dart';
 import 'package:e_fecta/domain/entities/user.dart';
 import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 
+const sealTicketsBatchSize = 100;
+
 class TicketRepositoryImpl implements TicketRepository {
   final firestore = FirebaseFirestore.instance;
   @override
@@ -47,34 +49,80 @@ class TicketRepositoryImpl implements TicketRepository {
     User user,
     int tokensPerTicket,
   ) async {
-    int? newBalance;
+    int newBalance;
     try {
-      for (Ticket ticket in tickets) {
-        Map<String, dynamic> ticketToSend = {};
-        for (var i = 0; i < 6; i++) {
-          ticketToSend['race${i + 1}'] = ticket.selectedOptions[i];
-          ticketToSend['pts${i + 1}'] = 0;
-        }
+      final batchCount = (tickets.length) % sealTicketsBatchSize;
 
-        ticketToSend['totalPts'] = 0;
-        ticketToSend['racedayId'] = ticket.racedayId;
-        ticketToSend['userId'] = user.id;
-        ticketToSend['username'] = user.username;
-        ticketToSend['timestamp'] = FieldValue.serverTimestamp();
-        final userRef = firestore.collection('users').doc(user.id);
-        final ticketRef = firestore.collection('tickets').doc();
-        newBalance = await firestore.runTransaction((transaction) async {
-          final currentBalance =
-              (await transaction.get(userRef)).get('balance');
-          transaction.set(ticketRef, ticketToSend);
-          transaction.update(userRef, {
-            'balance': FieldValue.increment(-tokensPerTicket),
-          });
+      var offset = 0;
+      var remaining = (tickets.length);
+      var batchLast =
+          remaining < sealTicketsBatchSize ? remaining : sealTicketsBatchSize;
+      final userRef = firestore.collection('users').doc(user.id);
+      final userResult = await userRef.get();
+      final initialBalance = userResult.data()!['balance'];
+      newBalance = initialBalance;
 
-          return currentBalance - tokensPerTicket;
-        });
-        // await firestore.collection('tickets').add(ticketToSend);
+      if (initialBalance < tickets.length * tokensPerTicket) {
+        throw Exception('Not enought  tokens');
       }
+
+      for (var i = 0; i < batchCount; i++) {
+        final batch = firestore.batch();
+        for (var j = offset; j < offset + batchLast; j++) {
+          final ticket = tickets.elementAt(j);
+          Map<String, dynamic> ticketToSend = {};
+          for (var i = 0; i < 6; i++) {
+            ticketToSend['race${i + 1}'] = ticket.selectedOptions[i];
+            ticketToSend['pts${i + 1}'] = 0;
+          }
+
+          ticketToSend['totalPts'] = 0;
+          ticketToSend['racedayId'] = ticket.racedayId;
+          ticketToSend['userId'] = user.id;
+          ticketToSend['username'] = user.username;
+          ticketToSend['timestamp'] = FieldValue.serverTimestamp();
+
+          final ticketRef = firestore.collection('tickets').doc();
+          batch.set(ticketRef, ticketToSend);
+        }
+        await batch.commit();
+        newBalance -= batchLast * tokensPerTicket;
+        await userRef.update({
+          'balance': FieldValue.increment(-(batchLast * tokensPerTicket)),
+        });
+
+        offset += batchLast;
+        remaining -= batchLast;
+        batchLast =
+            remaining < sealTicketsBatchSize ? remaining : sealTicketsBatchSize;
+      }
+
+      // for (Ticket ticket in tickets) {
+      //   Map<String, dynamic> ticketToSend = {};
+      //   for (var i = 0; i < 6; i++) {
+      //     ticketToSend['race${i + 1}'] = ticket.selectedOptions[i];
+      //     ticketToSend['pts${i + 1}'] = 0;
+      //   }
+
+      //   ticketToSend['totalPts'] = 0;
+      //   ticketToSend['racedayId'] = ticket.racedayId;
+      //   ticketToSend['userId'] = user.id;
+      //   ticketToSend['username'] = user.username;
+      //   ticketToSend['timestamp'] = FieldValue.serverTimestamp();
+      //   final userRef = firestore.collection('users').doc(user.id);
+      //   final ticketRef = firestore.collection('tickets').doc();
+      //   newBalance = await firestore.runTransaction((transaction) async {
+      //     final currentBalance =
+      //         (await transaction.get(userRef)).get('balance');
+      //     transaction.set(ticketRef, ticketToSend);
+      //     transaction.update(userRef, {
+      //       'balance': FieldValue.increment(-tokensPerTicket),
+      //     });
+
+      //     return currentBalance - tokensPerTicket;
+      //   });
+      //   // await firestore.collection('tickets').add(ticketToSend);
+      // }
       return Future.value(newBalance);
     } catch (e) {
       rethrow;
@@ -123,5 +171,16 @@ class TicketRepositoryImpl implements TicketRepository {
     } catch (e) {
       return Future.value(false);
     }
+  }
+
+  @override
+  Future<int> getSummary(String racedayId) async {
+    final ticketsCount = await firestore
+        .collection('tickets')
+        .where('racedayId', isEqualTo: racedayId)
+        .count()
+        .get();
+
+    return ticketsCount.count ?? 0;
   }
 }

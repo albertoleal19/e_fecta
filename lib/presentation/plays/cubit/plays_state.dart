@@ -184,3 +184,22 @@ class PlaysTicketsLoaded extends PlaysState {
         tickets,
       ];
 }
+
+class PlaysTicketsDisplay extends PlaysState {
+  const PlaysTicketsDisplay({
+    required this.ticketsRef,
+    int ticketsCount = 0,
+  }) : super(
+          tokensCount: 0,
+          ticketsCount: ticketsCount,
+        );
+
+  final Query<Ticket> ticketsRef;
+
+  @override
+  List<Object?> get props => [
+        tokensCount,
+        ticketsCount,
+        ticketsRef,
+      ];
+}

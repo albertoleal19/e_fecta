@@ -247,12 +247,14 @@ class TicketInfo2 extends StatelessWidget {
     this.padding,
     this.options = const [0, 0, 0, 0, 0, 0],
     this.pts = const [0, 0, 0, 0, 0, 0],
+    this.showPtsRow = true,
   }) : super(key: key);
 
   final double maxWidth;
   final EdgeInsets? padding;
   final List<int> options;
   final List<int> pts;
+  final bool showPtsRow;
 
   @override
   Widget build(BuildContext context) {
@@ -311,30 +313,32 @@ class TicketInfo2 extends StatelessWidget {
                 ),
               ],
             ),
-            Row(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.only(right: 30.0),
-                  child: SizedBox(
-                      width: 50,
-                      child: Text(
-                        'Pts',
-                        textAlign: TextAlign.end,
-                      )),
-                ),
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      ...List<Widget>.generate(
-                        options.length,
-                        (index) => TicketInfoItem(value: '${pts[index]}'),
-                      ),
-                    ],
+            if (showPtsRow) ...{
+              Row(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.only(right: 30.0),
+                    child: SizedBox(
+                        width: 50,
+                        child: Text(
+                          'Pts',
+                          textAlign: TextAlign.end,
+                        )),
                   ),
-                ),
-              ],
-            ),
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        ...List<Widget>.generate(
+                          options.length,
+                          (index) => TicketInfoItem(value: '${pts[index]}'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            }
           ],
         ),
       ),

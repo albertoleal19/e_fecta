@@ -67,14 +67,14 @@ class RaceRepositoryImpl implements RaceRepository {
         element.sort();
       }
       final racedayToSend = raceday.toJson();
-      racedayToSend['winners'] = <String, dynamic>{
-        '1': [],
-        '2': [],
-        '3': [],
-        '4': [],
-        '5': [],
-        '6': []
-      };
+      // racedayToSend['winners'] = <String, dynamic>{
+      //   '1': [],
+      //   '2': [],
+      //   '3': [],
+      //   '4': [],
+      //   '5': [],
+      //   '6': []
+      // };
       await firestore
           .collection('racedays')
           .doc(raceday.id)

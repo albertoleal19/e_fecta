@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:e_fecta/data/race_repository.dart';
 import 'package:e_fecta/data/ticket_repository.dart';
 import 'package:e_fecta/data/user_repository.dart';
@@ -52,8 +53,41 @@ class PlaysCubit extends Cubit<PlaysState> {
 
   Future<void> getTicketsForRaceday() async {
     if (_racedayInfo != null) {
-      final tickets = await ticketRepository.getTickets(_racedayInfo!.id);
-      emit(PlaysTicketsLoaded(tickets: tickets));
+      final ticketsRef = FirebaseFirestore.instance
+          .collection('tickets')
+          .where('racedayId', isEqualTo: _racedayInfo!.id)
+          .orderBy('totalPts', descending: true)
+          .orderBy('timestamp', descending: true);
+
+      final collection = ticketsRef.withConverter<Ticket>(
+        fromFirestore: (snapshot, options) {
+          final ticket = snapshot.data()!;
+          final List<int> options = List<int>.empty(growable: true);
+          for (var i = 1; i < 7; i++) {
+            options.add(ticket['race$i'] as int);
+          }
+          final List<int> points = List<int>.empty(growable: true);
+          for (var i = 1; i < 7; i++) {
+            points.add(ticket['pts$i'] as int);
+          }
+          return Ticket(
+            number: snapshot.id,
+            racedayId: ticket['racedayId'],
+            selectedOptions: options,
+            username: ticket['username'],
+            points: points,
+            totalPts: ticket['totalPts'],
+          );
+        },
+        toFirestore: (value, options) {
+          return {};
+        },
+      );
+      final ticketsCount = await ticketRepository.getSummary(_racedayInfo!.id);
+      emit(PlaysTicketsDisplay(
+          ticketsRef: collection, ticketsCount: ticketsCount));
+      //final tickets = await ticketRepository.getTickets(_racedayInfo!.id);
+      //emit(PlaysTicketsLoaded(tickets: tickets));
     }
   }
 

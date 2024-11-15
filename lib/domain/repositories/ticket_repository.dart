@@ -9,4 +9,6 @@ abstract class TicketRepository {
 
   Future<bool> updateTickets(
       String racedayId, int race, int position, int points);
+
+  Future<int> getSummary(String racedayId);
 }
