@@ -9,6 +9,7 @@ class Raceday extends Equatable {
     required this.trackId,
     required this.isOpen,
     this.tokensPerTicket = 1,
+    this.prizePlaces = 3,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class Raceday extends Equatable {
   final bool isOpen;
   final List<List<int>> winners;
   final List<List<int>> racesOptions;
+  final int prizePlaces;
 
   @override
   List<Object?> get props => [
@@ -27,8 +29,27 @@ class Raceday extends Equatable {
         tokensPerTicket,
         trackId,
         id,
-        isOpen
+        isOpen,
+        prizePlaces,
       ];
+
+  int get raceToSetWinners {
+    int raceNumber = 1; //defaut value
+    int index = 0;
+
+    while (index < 6) {
+      /// if the winners list on a specific index is emptuy or there are values
+      /// less than 1 (-1 or 0) within winners structure, it means no winners
+      /// have been set to that race;
+      if (winners[index].isEmpty ||
+          winners[index].any((element) => element < 1)) {
+        raceNumber = index + 1;
+        break;
+      }
+      index++;
+    }
+    return raceNumber;
+  }
 
   Map<String, dynamic> toJson() {
     Map<String, dynamic> races = {};
@@ -37,6 +58,7 @@ class Raceday extends Equatable {
       'ticketCost': tokensPerTicket,
       'trackId': trackId,
       'opened': isOpen,
+      'prizePlaces': prizePlaces,
     };
     for (var i = 0; i < racesOptions.length; i++) {
       // raceday['race${i + 1}'] = racesOptions[i];
@@ -54,6 +76,7 @@ class Raceday extends Equatable {
     bool? isOpen,
     List<List<int>>? winners,
     List<List<int>>? racesOptions,
+    int? prizePlaces,
   }) =>
       Raceday(
         id: id ?? this.id,
@@ -63,5 +86,6 @@ class Raceday extends Equatable {
         trackId: trackId ?? this.trackId,
         isOpen: isOpen ?? this.isOpen,
         tokensPerTicket: tokensPerTicket ?? this.tokensPerTicket,
+        prizePlaces: prizePlaces ?? this.prizePlaces,
       );
 }

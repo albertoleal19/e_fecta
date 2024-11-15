@@ -35,6 +35,7 @@ class AdminCubit extends Cubit<AdminState> {
   }
 
   Future<void> createRaceday({
+    required Raceday raceday,
     required int tokensPerTicket,
     required DateTime closingTime,
   }) async {
@@ -43,8 +44,9 @@ class AdminCubit extends Cubit<AdminState> {
       trackId: _trackId,
       racesOptions: _raceOptions.map((e) => e.toList()).toList(),
       winners: [],
-      isOpen: false,
+      isOpen: false, // to make sure it is closed for betting
       tokensPerTicket: tokensPerTicket,
+      prizePlaces: raceday.prizePlaces,
     );
     if (_raceOptions.any((element) => element.length < 3)) {
       emit(
@@ -66,18 +68,10 @@ class AdminCubit extends Cubit<AdminState> {
   }
 
   Future<void> editRaceday({
-    required int tokensPerTicket,
-    required DateTime closingTime,
-    required String racedayId,
+    required Raceday raceday,
   }) async {
-    final racedayToUpdate = Raceday(
-      id: racedayId,
-      closingTime: closingTime,
-      trackId: _trackId,
+    final racedayToUpdate = raceday.copyWith(
       racesOptions: _raceOptions.map((e) => e.toList()).toList(),
-      winners: [],
-      isOpen: false,
-      tokensPerTicket: tokensPerTicket,
     );
     if (_raceOptions.any((element) => element.length < 3)) {
       emit(
@@ -164,8 +158,53 @@ class AdminCubit extends Cubit<AdminState> {
     }
   }
 
-  Future<void> setWinners(String racedayId) async {
-    await ticketRepository.updateTickets(racedayId, 6, 3, 5);
+  Future<void> showSetWinnersSection(String racedayId) async {
+    final raceday = _racedays.firstWhere((element) => element.id == racedayId);
+    emit(
+      AdminSetWinnersSectionShownState(
+        raceday: raceday,
+        race: raceday.raceToSetWinners,
+      ),
+    );
+    //await ticketRepository.updateTickets(racedayId, 6, 3, 5);
+  }
+
+  Future<void> setWinners(
+    String racedayId,
+    // int raceNumber,
+    List<int> winners,
+  ) async {
+    final raceday = _racedays.firstWhere((element) => element.id == racedayId);
+    final raceToSetWinners = raceday.raceToSetWinners;
+    final setWinnersResponse =
+        await raceRepository.setWinners(racedayId, winners, raceToSetWinners);
+
+    if (setWinnersResponse) {
+      for (var i = 0; i < winners.length; i++) {
+        if (winners[i] > 0) {
+          int pts = 0;
+          switch (i) {
+            case 0:
+              pts = 5;
+              break;
+            case 1:
+              pts = 3;
+              break;
+            default:
+              pts = 1;
+              break;
+          }
+          await ticketRepository.updateTickets(
+            racedayId,
+            raceToSetWinners,
+            winners[i],
+            pts,
+          );
+        }
+      }
+    }
+
+    /// Error setting winners on raceday
   }
 
   Future<void> loadRacedaysInfo() async {

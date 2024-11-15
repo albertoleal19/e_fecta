@@ -166,3 +166,21 @@ class PlaysNotAvailable extends PlaysState {
         ticketsCount,
       ];
 }
+
+class PlaysTicketsLoaded extends PlaysState {
+  const PlaysTicketsLoaded({
+    required this.tickets,
+  }) : super(
+          tokensCount: 0,
+          ticketsCount: 0,
+        );
+
+  final List<Ticket> tickets;
+
+  @override
+  List<Object?> get props => [
+        tokensCount,
+        ticketsCount,
+        tickets,
+      ];
+}

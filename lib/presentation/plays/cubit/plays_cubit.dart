@@ -50,6 +50,13 @@ class PlaysCubit extends Cubit<PlaysState> {
     emit(TogglePlaysSelectionState(_playSelectionpOpened));
   }
 
+  Future<void> getTicketsForRaceday() async {
+    if (_racedayInfo != null) {
+      final tickets = await ticketRepository.getTickets(_racedayInfo!.id);
+      emit(PlaysTicketsLoaded(tickets: tickets));
+    }
+  }
+
   Future<void> setSelection({
     required List<int> optionSelected,
     required int race,
@@ -104,7 +111,8 @@ class PlaysCubit extends Cubit<PlaysState> {
   }
 
   Future<void> getRacedayConfig() async {
-    _loadConfigurationInfo();
+    await _loadConfigurationInfo();
+    await getTicketsForRaceday();
   }
 
   // Future<void> nextStep() async {
@@ -185,6 +193,7 @@ class PlaysCubit extends Cubit<PlaysState> {
             (ticketOptions) => Ticket(
               racedayId: _racedayInfo?.id ?? '',
               selectedOptions: ticketOptions,
+              username: _currentUser.username,
             ),
           )
           .toList();
@@ -210,7 +219,7 @@ class PlaysCubit extends Cubit<PlaysState> {
     }
   }
 
-  void _loadConfigurationInfo() async {
+  Future<void> _loadConfigurationInfo() async {
     final authUser = await userRepository.getAuthenticatedUser();
     if (authUser == null) {
       //emit(error to handle auth);

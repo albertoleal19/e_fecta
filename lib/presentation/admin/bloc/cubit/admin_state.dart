@@ -31,6 +31,18 @@ class AdminEditRacedaySectionShownState extends AdminState {
   // List<Object> get props => [optionsToDisplay];
 }
 
+class AdminSetWinnersSectionShownState extends AdminState {
+  const AdminSetWinnersSectionShownState({
+    required this.raceday,
+    required this.race,
+  });
+
+  final Raceday raceday;
+  final int race;
+  // @override
+  // List<Object> get props => [optionsToDisplay];
+}
+
 class AdminConfiguredRacedaysLoaded extends AdminState {
   const AdminConfiguredRacedaysLoaded({required this.racedays});
 

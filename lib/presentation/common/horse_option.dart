@@ -7,6 +7,7 @@ class HorseOption extends StatelessWidget {
   final bool compressed;
   final VoidCallback? onSelect;
   final bool selectable;
+  final bool enable;
 
   const HorseOption({
     Key? key,
@@ -15,6 +16,7 @@ class HorseOption extends StatelessWidget {
     this.compressed = true,
     this.onSelect,
     this.selectable = true,
+    this.enable = true,
   }) : super(key: key);
 
   @override
@@ -43,11 +45,11 @@ class HorseOption extends StatelessWidget {
           borderRadius: BorderRadius.circular(4),
           child: Row(
             children: [
-              if (selectable) ...{
+              if (selectable && enable) ...{
                 Radio<int>(
                   value: number,
                   groupValue: selected ? number : -1,
-                  toggleable: true,
+                  toggleable: enable,
                   onChanged: (value) {
                     onSelect!();
                   },
@@ -57,7 +59,8 @@ class HorseOption extends StatelessWidget {
               Expanded(
                 child: Text(
                   number.toString(),
-                  textAlign: selectable ? TextAlign.start : TextAlign.center,
+                  textAlign:
+                      selectable && enable ? TextAlign.start : TextAlign.center,
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w700,

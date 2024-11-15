@@ -8,6 +8,7 @@ class Race extends StatefulWidget {
   final int raceNumber;
   final List<int>? selectedHorses;
   final List<int> horses;
+  final List<int>? disabledHorses;
   final SelectionConfig selectionConfig;
   final bool compressed;
   final Function(List<int>)? onSelectionChanged;
@@ -16,6 +17,7 @@ class Race extends StatefulWidget {
     Key? key,
     required this.raceNumber,
     this.selectedHorses,
+    this.disabledHorses,
     this.horses = const [],
     this.selectionConfig = SelectionConfig.single,
     this.compressed = true,
@@ -41,6 +43,15 @@ class _RaceState extends State<Race> {
   //   super.didUpdateWidget(oldWidget);
   // }
 
+  bool shouldBeEnabled(int horseNumber) {
+    // if (widget.selectionConfig == SelectionConfig.none) return false;
+    if (widget.disabledHorses != null &&
+        widget.disabledHorses!.isNotEmpty &&
+        widget.disabledHorses!.contains(horseNumber)) return false;
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Wrap(
@@ -52,6 +63,7 @@ class _RaceState extends State<Race> {
           return HorseOption(
             selectable: widget.selectionConfig != SelectionConfig.none,
             number: horseNumber,
+            enable: shouldBeEnabled(horseNumber),
             onSelect: () {
               setState(() {
                 if (widget.selectionConfig != SelectionConfig.none) {

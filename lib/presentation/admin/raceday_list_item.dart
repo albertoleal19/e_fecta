@@ -13,6 +13,8 @@ class RaceListItem extends StatelessWidget {
 
   final Raceday raceday;
 
+  bool get shouldEnableWinnersConfig => raceday.raceToSetWinners <= 6;
+
   @override
   Widget build(BuildContext context) {
     final double width = MediaQuery.sizeOf(context).width;
@@ -30,6 +32,7 @@ class RaceListItem extends StatelessWidget {
                 closingTime: raceday.closingTime,
                 tokensPerTicket: raceday.tokensPerTicket,
                 isOpen: raceday.isOpen,
+                enableWinnersSetting: shouldEnableWinnersConfig,
               ),
               const SizedBox(height: 20),
               RacesConfig(
@@ -51,11 +54,13 @@ class RacedayGeneralInfo extends StatelessWidget {
     required this.tokensPerTicket,
     required this.racedayId,
     this.isOpen = false,
+    this.enableWinnersSetting = false,
   }) : super(key: key);
   final DateTime closingTime;
   final String racedayId;
   final int tokensPerTicket;
   final bool isOpen;
+  final bool enableWinnersSetting;
 
   String get closingTimeString =>
       '${closingTime.year}/${closingTime.month.toString().padLeft(2, '0')}/${closingTime.day.toString().padLeft(2, '0')} ${closingTime.hour.toString().padLeft(2, '0')}:${closingTime.minute.toString().padLeft(2, '0')}';
@@ -203,7 +208,9 @@ class RacedayGeneralInfo extends StatelessWidget {
           ),
           const VerticalDivider(),
           TextButton(
-            onPressed: () => cubit.setWinners(racedayId),
+            onPressed: () => enableWinnersSetting
+                ? cubit.showSetWinnersSection(racedayId)
+                : null,
             child: const Text('Indicar Ganadores'),
           ),
         ],

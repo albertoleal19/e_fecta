@@ -22,15 +22,15 @@ class RaceRepositoryImpl implements RaceRepository {
       List<List<int>> options = _mapRaces(raceday.data()['races']);
 
       return Raceday(
-        id: raceday.id,
-        trackId: trackId,
-        tokensPerTicket: raceday['ticketCost'],
-        closingTime: DateTime.fromMillisecondsSinceEpoch(
-            raceday['closingDateTime'].millisecondsSinceEpoch),
-        racesOptions: options,
-        isOpen: raceday['opened'],
-        winners: const [],
-      );
+          id: raceday.id,
+          trackId: trackId,
+          tokensPerTicket: raceday['ticketCost'],
+          closingTime: DateTime.fromMillisecondsSinceEpoch(
+              raceday['closingDateTime'].millisecondsSinceEpoch),
+          racesOptions: options,
+          isOpen: raceday['opened'],
+          winners: const [],
+          prizePlaces: raceday['prizePlaces']);
     }
     return null;
   }
@@ -67,6 +67,14 @@ class RaceRepositoryImpl implements RaceRepository {
         element.sort();
       }
       final racedayToSend = raceday.toJson();
+      racedayToSend['winners'] = <String, dynamic>{
+        '1': [],
+        '2': [],
+        '3': [],
+        '4': [],
+        '5': [],
+        '6': []
+      };
       await firestore
           .collection('racedays')
           .doc(raceday.id)
@@ -80,9 +88,15 @@ class RaceRepositoryImpl implements RaceRepository {
   @override
   Future<bool> setWinners(String racedayId, List<int> winners, int race) async {
     try {
-      await firestore.collection('racedays').doc(racedayId).update({
-        'winners': {'$race': winners}
-      });
+      final winnersToSet = winners.where((element) => element > 0).toList();
+      final docRef = firestore.collection('racedays').doc(racedayId);
+      var winnersToUpdate = (await docRef.get()).data()?['winners'];
+      if (winnersToUpdate != null) {
+        winnersToUpdate['$race'] = winnersToSet;
+      } else {
+        winnersToUpdate = {'$race': winnersToSet};
+      }
+      await docRef.update({'winners': winnersToUpdate});
       return Future.value(true);
     } catch (e) {
       return Future.value(false);
@@ -102,6 +116,14 @@ class RaceRepositoryImpl implements RaceRepository {
     for (var raceday in racedayResult.docs.map((e) => e).toList()) {
       List<List<int>> options = _mapRaces(raceday['races']);
 
+      final List<List<int>> winners = raceday.data().keys.contains('winners')
+          ? _mapWinners(raceday['winners'])
+          : List.generate(6, (index) => []);
+
+      final prizePlaces = raceday.data().keys.contains('prizePlaces')
+          ? raceday['prizePlaces']
+          : 3;
+
       racedays.add(
         Raceday(
           id: raceday.id,
@@ -111,17 +133,22 @@ class RaceRepositoryImpl implements RaceRepository {
               raceday['closingDateTime'].millisecondsSinceEpoch),
           racesOptions: options,
           isOpen: raceday['opened'] ?? false,
-          winners: const [
-            [1, 2, 4],
-            [1, 2, 4],
-            [1, 2, 4],
-            [1, 2, 4],
-            [1, 2, 4],
-            [1, 2, 4]
-          ],
+          prizePlaces: prizePlaces,
+          winners: winners,
+          // winners: const [
+          //   [1, 2, 4],
+          //   [1, 2, 4],
+          //   [1, 2, 4],
+          //   [1, 2, 4],
+          //   [1, 2, 4],
+          //   [1, 2, 4]
+          // ],
         ),
       );
     }
+
+    /// Sorting from latest
+    racedays.sort((a, b) => a.closingTime.isAfter(b.closingTime) ? -1 : 1);
     return racedays;
   }
 
@@ -182,6 +209,24 @@ class RaceRepositoryImpl implements RaceRepository {
     //       .map((e) => int.parse(e.toString()))
     //       .toList(),
     // ];
+  }
+
+  List<List<int>> _mapWinners(Map<String, dynamic> racedayWinnersJson) {
+    try {
+      List<List<int>> winners = [];
+      for (var i = 1; i < 7; i++) {
+        if (racedayWinnersJson['$i'] != null) {
+          winners.add((racedayWinnersJson['$i'] as List<dynamic>)
+              .map((e) => int.parse(e.toString()))
+              .toList());
+        } else {
+          winners.add([]);
+        }
+      }
+      return winners;
+    } catch (ex) {
+      return List.generate(6, (index) => []);
+    }
   }
 
   @override

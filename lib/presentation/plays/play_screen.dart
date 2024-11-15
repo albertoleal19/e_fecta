@@ -156,13 +156,32 @@ class PlayScreen extends StatelessWidget {
                                             ),
                                           ),
                                           Expanded(
-                                            child: ListView.builder(
-                                              physics:
-                                                  const ClampingScrollPhysics(),
-                                              itemBuilder: (context, index) {
-                                                return const ResultListItem();
+                                            child: BlocBuilder<PlaysCubit,
+                                                PlaysState>(
+                                              buildWhen: (previous, current) =>
+                                                  current is PlaysTicketsLoaded,
+                                              builder: (context, state) {
+                                                if (state
+                                                    is PlaysTicketsLoaded) {
+                                                  return ListView.builder(
+                                                    physics:
+                                                        const ClampingScrollPhysics(),
+                                                    itemBuilder:
+                                                        (context, index) {
+                                                      return ResultListItem(
+                                                        ticket: state
+                                                            .tickets[index],
+                                                        position: index + 1,
+                                                      );
+                                                    },
+                                                    itemCount:
+                                                        state.tickets.length,
+                                                  );
+                                                } else {
+                                                  return const SizedBox
+                                                      .shrink();
+                                                }
                                               },
-                                              itemCount: 20,
                                             ),
                                           ),
                                         ],

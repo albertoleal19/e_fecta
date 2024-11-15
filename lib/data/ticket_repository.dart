@@ -6,9 +6,39 @@ import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 class TicketRepositoryImpl implements TicketRepository {
   final firestore = FirebaseFirestore.instance;
   @override
-  Future getTickets() {
-    // TODO: implement getTickets
-    throw UnimplementedError();
+  Future<List<Ticket>> getTickets(String racedayId) async {
+    final ticketsResult = await firestore
+        .collection('tickets')
+        .where('racedayId', isEqualTo: racedayId)
+        .orderBy('totalPts', descending: true)
+        .orderBy('timestamp', descending: true)
+        .limit(100)
+        .get();
+
+    try {
+      final tickets = ticketsResult.docs.map((ticket) {
+        final List<int> options = List<int>.empty(growable: true);
+        for (var i = 1; i < 7; i++) {
+          options.add(ticket.data()['race$i'] as int);
+        }
+        final List<int> points = List<int>.empty(growable: true);
+        for (var i = 1; i < 7; i++) {
+          points.add(ticket.data()['pts$i'] as int);
+        }
+        return Ticket(
+          number: ticket.id,
+          racedayId: ticket['racedayId'],
+          selectedOptions: options,
+          username: ticket['username'],
+          points: points,
+          totalPts: ticket['totalPts'],
+        );
+      }).toList();
+      return tickets;
+    } catch (e) {
+      print('Error: e');
+      rethrow;
+    }
   }
 
   @override
@@ -53,12 +83,12 @@ class TicketRepositoryImpl implements TicketRepository {
 
   @override
   Future<bool> updateTickets(
-      String racedayId, int race, int position, int points) async {
+      String racedayId, int race, int option, int points) async {
     try {
       final query = firestore
           .collection('tickets')
           // .where('userId', isEqualTo: 'alberto')
-          .where('race$race', isEqualTo: position)
+          .where('race$race', isEqualTo: option)
           .where('racedayId', isEqualTo: racedayId);
       final count = (await query.count().get()).count ?? 0;
       final batchCount = count % 500;

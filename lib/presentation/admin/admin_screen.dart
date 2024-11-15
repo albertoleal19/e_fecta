@@ -2,6 +2,7 @@ import 'package:e_fecta/core/app_colors.dart';
 import 'package:e_fecta/core/size_contants.dart';
 import 'package:e_fecta/presentation/admin/bloc/cubit/admin_cubit.dart';
 import 'package:e_fecta/presentation/admin/raceday_list_item.dart';
+import 'package:e_fecta/presentation/admin/winners_config.dart';
 import 'package:e_fecta/presentation/common/race/race.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -76,6 +77,7 @@ class _AdminScreenState extends State<AdminScreen> {
           buildWhen: (previous, current) =>
               current is AdminNewRacedaySectionShownState ||
               current is AdminEditRacedaySectionShownState ||
+              current is AdminSetWinnersSectionShownState ||
               current is AdminInitial,
           builder: (context, state) {
             if (state is AdminNewRacedaySectionShownState) {
@@ -194,6 +196,37 @@ class _AdminScreenState extends State<AdminScreen> {
                           );
                         }).toList(),
                       ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Selecciona los lugares a pagar',
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<int>(
+                        segments: const <ButtonSegment<int>>[
+                          ButtonSegment<int>(
+                            value: 1,
+                            label: Text('1er Lugar'),
+                          ),
+                          ButtonSegment<int>(
+                            value: 2,
+                            label: Text('1er y 2do Lugar'),
+                          ),
+                          ButtonSegment<int>(
+                            value: 3,
+                            label: Text('1er, 2do y 3er Lugar'),
+                          ),
+                        ],
+                        selected: <int>{state.raceday.prizePlaces},
+                        onSelectionChanged: (Set<int> newSelection) {
+                          adminCubit.changeRacedayData(
+                            state.raceday.copyWith(
+                              prizePlaces: newSelection.first,
+                            ),
+                            true,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -261,6 +294,7 @@ class _AdminScreenState extends State<AdminScreen> {
                               const VerticalDivider(),
                               ElevatedButton(
                                 onPressed: () => adminCubit.createRaceday(
+                                  raceday: state.raceday,
                                   tokensPerTicket:
                                       state.raceday.tokensPerTicket,
                                   closingTime: state.raceday.closingTime,
@@ -390,6 +424,36 @@ class _AdminScreenState extends State<AdminScreen> {
                           );
                         }).toList(),
                       ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Selecciona los lugares a pagar',
+                      ),
+                      const SizedBox(height: 8),
+                      SegmentedButton<int>(
+                        segments: const <ButtonSegment<int>>[
+                          ButtonSegment<int>(
+                            value: 1,
+                            label: Text('1er Lugar'),
+                          ),
+                          ButtonSegment<int>(
+                            value: 2,
+                            label: Text('1er y 2do Lugar'),
+                          ),
+                          ButtonSegment<int>(
+                            value: 3,
+                            label: Text('1er, 2do y 3er Lugar'),
+                          ),
+                        ],
+                        selected: <int>{state.raceday.prizePlaces},
+                        onSelectionChanged: (Set<int> newSelection) {
+                          adminCubit.changeRacedayData(
+                            state.raceday
+                                .copyWith(prizePlaces: newSelection.first),
+                            false,
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 8),
                       const Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -451,10 +515,11 @@ class _AdminScreenState extends State<AdminScreen> {
                               const VerticalDivider(),
                               ElevatedButton(
                                 onPressed: () => adminCubit.editRaceday(
-                                  racedayId: state.raceday.id,
-                                  tokensPerTicket:
-                                      state.raceday.tokensPerTicket,
-                                  closingTime: state.raceday.closingTime,
+                                  raceday: state.raceday,
+                                  // racedayId: state.raceday.id,
+                                  // tokensPerTicket:
+                                  //     state.raceday.tokensPerTicket,
+                                  // closingTime: state.raceday.closingTime,
                                 ),
                                 child: const Text('Aceptar'),
                               ),
@@ -465,6 +530,16 @@ class _AdminScreenState extends State<AdminScreen> {
                     ],
                   ),
                 ),
+              );
+            } else if (state is AdminSetWinnersSectionShownState) {
+              return WinnersConfig(
+                raceNumber: state.race,
+                raceOptions:
+                    state.raceday.racesOptions.elementAt(state.race - 1),
+                prizePlaces: state.raceday.prizePlaces,
+                onSetWinners: (winners) {
+                  adminCubit.setWinners(state.raceday.id, winners);
+                },
               );
             }
             return const SizedBox.shrink();

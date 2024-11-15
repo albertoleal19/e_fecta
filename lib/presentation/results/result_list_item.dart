@@ -1,9 +1,17 @@
 import 'package:e_fecta/core/app_colors.dart';
 import 'package:e_fecta/core/size_contants.dart';
+import 'package:e_fecta/domain/entities/ticket.dart';
 import 'package:flutter/material.dart';
 
 class ResultListItem extends StatelessWidget {
-  const ResultListItem({Key? key}) : super(key: key);
+  const ResultListItem({
+    Key? key,
+    required this.ticket,
+    required this.position,
+  }) : super(key: key);
+
+  final Ticket ticket;
+  final int position;
 
   @override
   Widget build(BuildContext context) {
@@ -20,17 +28,26 @@ class ResultListItem extends StatelessWidget {
                 padding: const EdgeInsets.only(left: 20.0),
                 child: Builder(builder: (context) {
                   if (!isCompressedScreen) {
-                    return const Column(
+                    return Column(
                       children: [
                         Expanded(
                           child: Row(
                             children: [
-                              Expanded(flex: 6, child: UserInfo()),
+                              Expanded(
+                                flex: 6,
+                                child: UserInfo(
+                                  ticketId: ticket.number,
+                                  username: ticket.username,
+                                  position: position,
+                                ),
+                              ),
                               Flexible(
                                 flex: 4,
                                 child: TicketInfo2(
+                                  options: ticket.selectedOptions,
+                                  pts: ticket.points,
                                   maxWidth: 300,
-                                  padding: EdgeInsets.only(right: 20),
+                                  padding: const EdgeInsets.only(right: 20),
                                 ),
                                 // child: Container(
                                 //   color: AppColors.errorRed,
@@ -44,22 +61,30 @@ class ResultListItem extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Divider(),
+                        const Divider(),
                       ],
                     );
                   } else {
-                    return const Column(
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Expanded(flex: 6, child: UserInfo()),
+                        Expanded(
+                            flex: 6,
+                            child: UserInfo(
+                              ticketId: ticket.number,
+                              username: ticket.username,
+                              position: position,
+                            )),
                         Expanded(
                           flex: 4,
                           child: TicketInfo2(
-                            padding: EdgeInsets.only(right: 20),
+                            options: ticket.selectedOptions,
+                            pts: ticket.points,
+                            padding: const EdgeInsets.only(right: 20),
                           ),
                         ),
-                        Divider(),
+                        const Divider(),
                       ],
                     );
                   }
@@ -70,10 +95,10 @@ class ResultListItem extends StatelessWidget {
           Container(
             width: 66,
             color: AppColors.green,
-            child: const Column(
+            child: Column(
               children: [
-                Expanded(child: Text('6')),
-                Divider(),
+                Expanded(child: Text('${ticket.totalPts}')),
+                const Divider(),
               ],
             ),
           )
@@ -84,7 +109,16 @@ class ResultListItem extends StatelessWidget {
 }
 
 class UserInfo extends StatelessWidget {
-  const UserInfo({Key? key}) : super(key: key);
+  const UserInfo({
+    Key? key,
+    required this.ticketId,
+    required this.username,
+    required this.position,
+  }) : super(key: key);
+
+  final String ticketId;
+  final String username;
+  final int position;
 
   @override
   Widget build(BuildContext context) {
@@ -101,22 +135,21 @@ class UserInfo extends StatelessWidget {
               child: Builder(
                 builder: (context) {
                   if (isCompressedScreen) {
-                    return const Column(
+                    return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('JONA102'),
-                        SizedBox(height: 8.0),
-                        Text('6764212-335019822'),
+                        Text(username),
+                        const SizedBox(height: 8.0),
+                        Text(ticketId),
                       ],
                     );
                   } else {
-                    return const Row(
+                    return Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.max,
                       children: [
-                        Text('JONA102'),
-                        Expanded(
-                            child: Center(child: Text('6764212-335019822'))),
+                        Text(username),
+                        Expanded(child: Center(child: Text(ticketId))),
                       ],
                     );
                   }
@@ -213,11 +246,13 @@ class TicketInfo2 extends StatelessWidget {
     this.maxWidth = double.maxFinite,
     this.padding,
     this.options = const [0, 0, 0, 0, 0, 0],
+    this.pts = const [0, 0, 0, 0, 0, 0],
   }) : super(key: key);
 
   final double maxWidth;
   final EdgeInsets? padding;
   final List<int> options;
+  final List<int> pts;
 
   @override
   Widget build(BuildContext context) {
@@ -232,7 +267,12 @@ class TicketInfo2 extends StatelessWidget {
               children: [
                 const Padding(
                   padding: EdgeInsets.only(right: 30.0),
-                  child: Text('Carrera'),
+                  child: SizedBox(
+                      width: 50,
+                      child: Text(
+                        'Carrera',
+                        textAlign: TextAlign.end,
+                      )),
                 ),
                 Expanded(
                   child: Row(
@@ -241,7 +281,6 @@ class TicketInfo2 extends StatelessWidget {
                       ...List<Widget>.generate(
                         6,
                         (index) => TicketInfoItem(value: '${index + 1}a'),
-                        // (index) => Text('${index + 1}a'),
                       ),
                     ],
                   ),
@@ -252,7 +291,12 @@ class TicketInfo2 extends StatelessWidget {
               children: [
                 const Padding(
                   padding: EdgeInsets.only(right: 30.0),
-                  child: Text('Caballo'),
+                  child: SizedBox(
+                      width: 50,
+                      child: Text(
+                        'Caballo',
+                        textAlign: TextAlign.end,
+                      )),
                 ),
                 Expanded(
                   child: Row(
@@ -261,6 +305,30 @@ class TicketInfo2 extends StatelessWidget {
                       ...List<Widget>.generate(
                         options.length,
                         (index) => TicketInfoItem(value: '${options[index]}'),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            Row(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.only(right: 30.0),
+                  child: SizedBox(
+                      width: 50,
+                      child: Text(
+                        'Pts',
+                        textAlign: TextAlign.end,
+                      )),
+                ),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      ...List<Widget>.generate(
+                        options.length,
+                        (index) => TicketInfoItem(value: '${pts[index]}'),
                       ),
                     ],
                   ),

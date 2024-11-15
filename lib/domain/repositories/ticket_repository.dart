@@ -5,7 +5,7 @@ abstract class TicketRepository {
   Future<int?> sealTickets(
       List<Ticket> tickets, User user, int tokensPerTicket);
 
-  Future<dynamic> getTickets();
+  Future<List<Ticket>> getTickets(String racedayId);
 
   Future<bool> updateTickets(
       String racedayId, int race, int position, int points);
