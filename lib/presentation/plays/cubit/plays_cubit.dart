@@ -8,6 +8,7 @@ import 'package:e_fecta/domain/entities/user.dart';
 import 'package:e_fecta/domain/repositories/race_repository.dart';
 import 'package:e_fecta/domain/repositories/ticket_repository.dart';
 import 'package:e_fecta/domain/repositories/user_repository.dart';
+import 'package:e_fecta/presentation/plays/tickets_model.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -23,6 +24,8 @@ class PlaysCubit extends Cubit<PlaysState> {
 
   late User _currentUser;
   Raceday? _racedayInfo;
+  List<Raceday> _racedays = [];
+  int _selectedRaceIndex = 0;
 
   final UserRepository userRepository = UserRepositoryImpl();
   final RaceRepository raceRepository = RaceRepositoryImpl();
@@ -39,56 +42,143 @@ class PlaysCubit extends Cubit<PlaysState> {
     return playSelection.map((e) => e.toList()).toList();
   }
 
+  Future<void> _loadPastRacedays() async {
+    try {
+      _racedays = await raceRepository.getAllPastRacedaysForTrack(_trackId);
+      if (_racedayInfo != null) {
+        _racedays = [_racedayInfo!, ..._racedays];
+      }
+
+      _selectedRaceIndex = 0;
+      emit(
+        PlaysResultsRacedays(
+          racedays: _racedays,
+          selectedRacedayIndex: _selectedRaceIndex,
+        ),
+      );
+    } catch (e) {
+      print('Error loading past racedays: ${e.toString()}');
+    }
+  }
+
+  Future<void> _loadConfigurationInfo() async {
+    final authUser = await userRepository.getAuthenticatedUser();
+    if (authUser == null) {
+      //emit(error to handle auth);
+    } else {
+      _currentUser = authUser;
+    }
+    _racedayInfo = await raceRepository.getBetAvailableRaceday(_trackId);
+    if (_racedayInfo != null) {
+      emit(
+        PlaysRacesConfigLoaded(
+          racesOptions: _racedayInfo!.racesOptions,
+          ticketsCount: ticketsCount,
+          tokenCounts: tokensCount,
+          tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
+          closingTime: _racedayInfo!.closingTime,
+          isPlayConfigOpened: _playSelectionpOpened,
+        ),
+      );
+    } else {
+      emit(const PlaysNotAvailable());
+    }
+  }
+
+  List<List<int>> _generateCombinations(List<List<int>> selectedOptions) {
+    // base case: if list is empty, empty list returned
+    if (selectedOptions.isEmpty) {
+      return [[]];
+    }
+
+    // Take first list
+    List<int> firstList = selectedOptions.first;
+
+    // Generate combination for remaining lists
+    List<List<int>> remainingCombinations =
+        _generateCombinations(selectedOptions.sublist(1));
+
+    // Crear las combinaciones tomando un elemento de la primera lista
+    List<List<int>> result = [];
+    for (var element in firstList) {
+      for (var combination in remainingCombinations) {
+        result.add([element, ...combination]);
+      }
+    }
+
+    return result;
+  }
+
+  Future<void> _getRacedayTickets(String racedayId) async {
+    final ticketsRef = FirebaseFirestore.instance
+        .collection('tickets')
+        .where('racedayId', isEqualTo: racedayId)
+        .orderBy('totalPts', descending: true)
+        .orderBy('timestamp', descending: true);
+
+    final collection = ticketsRef.withConverter<TicketModel>(
+      fromFirestore: (snapshot, options) {
+        final ticket = snapshot.data()!;
+        final List<int> horseOptions = List<int>.empty(growable: true);
+        for (var i = 1; i < 7; i++) {
+          horseOptions.add(ticket['race$i'] as int);
+        }
+        final List<int> points = List<int>.empty(growable: true);
+        for (var i = 1; i < 7; i++) {
+          points.add(ticket['pts$i'] as int);
+        }
+        return TicketModel(
+          number: snapshot.id,
+          racedayId: ticket['racedayId'],
+          selectedOptions: horseOptions,
+          username: ticket['username'],
+          points: points,
+          totalPts: ticket['totalPts'],
+          position: 1,
+        );
+      },
+      toFirestore: (value, options) {
+        return {};
+      },
+    );
+    final ticketsCount = await ticketRepository.getSummary(racedayId);
+    emit(
+      PlaysTicketsDisplay(
+        ticketsRef: collection,
+        ticketsCount: ticketsCount,
+      ),
+    );
+  }
+
+  Future<void> selectRacedayForResults(int racedayIndex) async {
+    _selectedRaceIndex = racedayIndex;
+    emit(
+      PlaysResultsRacedays(
+        racedays: _racedays,
+        selectedRacedayIndex: _selectedRaceIndex,
+      ),
+    );
+    _getRacedayTickets(_racedays[_selectedRaceIndex].id);
+  }
+
+  void processInitialLoading() async {
+    await _loadConfigurationInfo();
+    await _loadPastRacedays();
+    if (_racedays.isNotEmpty) {
+      await _getRacedayTickets(_racedays.first.id);
+    }
+  }
+
   Future<void> setTrack(String trackId) async {
     if (_trackId != trackId) {
       _trackId = trackId;
-      _loadConfigurationInfo();
+      processInitialLoading();
     }
   }
 
   void togglePlaysSelections() {
     _playSelectionpOpened = !_playSelectionpOpened;
     emit(TogglePlaysSelectionState(_playSelectionpOpened));
-  }
-
-  Future<void> getTicketsForRaceday() async {
-    if (_racedayInfo != null) {
-      final ticketsRef = FirebaseFirestore.instance
-          .collection('tickets')
-          .where('racedayId', isEqualTo: _racedayInfo!.id)
-          .orderBy('totalPts', descending: true)
-          .orderBy('timestamp', descending: true);
-
-      final collection = ticketsRef.withConverter<Ticket>(
-        fromFirestore: (snapshot, options) {
-          final ticket = snapshot.data()!;
-          final List<int> options = List<int>.empty(growable: true);
-          for (var i = 1; i < 7; i++) {
-            options.add(ticket['race$i'] as int);
-          }
-          final List<int> points = List<int>.empty(growable: true);
-          for (var i = 1; i < 7; i++) {
-            points.add(ticket['pts$i'] as int);
-          }
-          return Ticket(
-            number: snapshot.id,
-            racedayId: ticket['racedayId'],
-            selectedOptions: options,
-            username: ticket['username'],
-            points: points,
-            totalPts: ticket['totalPts'],
-          );
-        },
-        toFirestore: (value, options) {
-          return {};
-        },
-      );
-      final ticketsCount = await ticketRepository.getSummary(_racedayInfo!.id);
-      emit(PlaysTicketsDisplay(
-          ticketsRef: collection, ticketsCount: ticketsCount));
-      //final tickets = await ticketRepository.getTickets(_racedayInfo!.id);
-      //emit(PlaysTicketsLoaded(tickets: tickets));
-    }
   }
 
   Future<void> setSelection({
@@ -117,13 +207,7 @@ class PlaysCubit extends Cubit<PlaysState> {
         ),
       );
     } else {
-      // playSelection[race].clear();
-      // playSelection[race].addAll(optionSelected);
       playSelection = List.from(pleriminarySelection);
-
-      // ticketsCount = playSelection
-      //     .map((e) => e.length)
-      //     .reduce((value, element) => value * element);
 
       ticketsCount = preliminaryTicketsCount;
 
@@ -133,7 +217,6 @@ class PlaysCubit extends Cubit<PlaysState> {
         PlaysSelectionChanged(
           selectedHourses: _getSelectionForStates(),
           isValidPlay: _isValidPlay(),
-          // step: step,
           tokenCounts: tokensCount,
           ticketsCount: ticketsCount,
           exceededTokens: false,
@@ -146,46 +229,7 @@ class PlaysCubit extends Cubit<PlaysState> {
 
   Future<void> getRacedayConfig() async {
     await _loadConfigurationInfo();
-    await getTicketsForRaceday();
   }
-
-  // Future<void> nextStep() async {
-  //   step++;
-  //   print('Step: $step');
-  //   switch (step) {
-  //     case 6:
-  //       calcultaSummary();
-  //       break;
-  //     case 7:
-  //       sealTicket();
-  //       break;
-  //     default:
-  //       emit(
-  //         PlaysStepChanged(
-  //           selectedHourses: playSelection.map((e) => e.toList()).toList(),
-  //           step: step,
-  //           tokenCounts: tokensCount,
-  //           ticketsCount: ticketsCount,
-  //         ),
-  //       );
-  //       break;
-  //   }
-  // }
-
-  // Future<void> previousStep() async {
-  //   if (step > 0) {
-  //     step--;
-  //     emit(
-  //       PlaysStepChanged(
-  //         selectedHourses:
-  //             step < 6 ? playSelection.map((e) => e.toList()).toList() : [],
-  //         step: step,
-  //         tokenCounts: tokensCount,
-  //         ticketsCount: ticketsCount,
-  //       ),
-  //     );
-  //   }
-  // }
 
   Future<void> modifySelection() async {
     emit(
@@ -251,52 +295,5 @@ class PlaysCubit extends Cubit<PlaysState> {
     } else {
       debugPrint('Error: Previous state is not PlaysSummary');
     }
-  }
-
-  Future<void> _loadConfigurationInfo() async {
-    final authUser = await userRepository.getAuthenticatedUser();
-    if (authUser == null) {
-      //emit(error to handle auth);
-    } else {
-      _currentUser = authUser;
-    }
-    _racedayInfo = await raceRepository.getRecedayInfo(_trackId);
-    if (_racedayInfo != null) {
-      emit(
-        PlaysRacesConfigLoaded(
-          racesOptions: _racedayInfo!.racesOptions,
-          ticketsCount: ticketsCount,
-          tokenCounts: tokensCount,
-          tokensPerTicket: _racedayInfo?.tokensPerTicket ?? 1,
-          closingTime: _racedayInfo!.closingTime,
-        ),
-      );
-    } else {
-      emit(const PlaysNotAvailable());
-    }
-  }
-
-  List<List<int>> _generateCombinations(List<List<int>> selectedOptions) {
-    // base case: if list is empty, empty list returned
-    if (selectedOptions.isEmpty) {
-      return [[]];
-    }
-
-    // Take first list
-    List<int> firstList = selectedOptions.first;
-
-    // Generate combination for remaining lists
-    List<List<int>> remainingCombinations =
-        _generateCombinations(selectedOptions.sublist(1));
-
-    // Crear las combinaciones tomando un elemento de la primera lista
-    List<List<int>> result = [];
-    for (var element in firstList) {
-      for (var combination in remainingCombinations) {
-        result.add([element, ...combination]);
-      }
-    }
-
-    return result;
   }
 }

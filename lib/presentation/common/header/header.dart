@@ -24,7 +24,6 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
               context.read<AdminCubit>().setTrack(state.selectedTrack.id);
             } else {
               context.read<PlaysCubit>().setTrack(state.selectedTrack.id);
-              context.read<PlaysCubit>().getTicketsForRaceday();
             }
           }
         },

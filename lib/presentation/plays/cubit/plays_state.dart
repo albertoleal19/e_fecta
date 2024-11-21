@@ -69,6 +69,7 @@ class PlaysRacesConfigLoaded extends PlaysState {
     required this.tokensPerTicket,
     required int ticketsCount,
     required int tokenCounts,
+    this.isPlayConfigOpened = false,
   }) : super(
           tokensCount: tokenCounts,
           ticketsCount: ticketsCount,
@@ -77,6 +78,7 @@ class PlaysRacesConfigLoaded extends PlaysState {
   final List<List<int>> racesOptions;
   final DateTime closingTime;
   final int tokensPerTicket;
+  final bool isPlayConfigOpened;
 
   @override
   List<Object?> get props => [
@@ -194,7 +196,7 @@ class PlaysTicketsDisplay extends PlaysState {
           ticketsCount: ticketsCount,
         );
 
-  final Query<Ticket> ticketsRef;
+  final Query<TicketModel> ticketsRef;
 
   @override
   List<Object?> get props => [
@@ -202,4 +204,21 @@ class PlaysTicketsDisplay extends PlaysState {
         ticketsCount,
         ticketsRef,
       ];
+}
+
+class PlaysResultsRacedays extends PlaysState {
+  const PlaysResultsRacedays({
+    required this.racedays,
+    required this.selectedRacedayIndex,
+  }) : super(
+          tokensCount: 0,
+          ticketsCount: 0,
+        );
+
+  final List<Raceday> racedays;
+  final int selectedRacedayIndex;
+
+  @override
+  List<Object?> get props =>
+      [tokensCount, ticketsCount, racedays, selectedRacedayIndex];
 }

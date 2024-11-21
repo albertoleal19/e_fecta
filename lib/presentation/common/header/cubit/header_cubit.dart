@@ -25,13 +25,7 @@ class HeaderCubit extends Cubit<HeaderState> {
     tracks = tracksResponse;
     selectedTrack = tracks.first;
     currentUser = user;
-    emit(
-      HeaderInfoChanged(
-        tracks: tracks,
-        user: user,
-        selectedTrack: selectedTrack!,
-      ),
-    );
+    _emitHeaderChangeState();
   }
 
   Future<void> changeTrack(String trackId) async {

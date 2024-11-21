@@ -30,7 +30,7 @@ class EfectaApp extends StatelessWidget {
         colorScheme: const ColorScheme(
           brightness: Brightness.dark,
           primary: AppColors.darkGreen,
-          background: AppColors.green,
+          background: AppColors.darkBlue,
           onBackground: AppColors.white,
           onPrimary: AppColors.white,
           secondary: AppColors.green,
@@ -81,19 +81,21 @@ class EfectaApp extends StatelessWidget {
           ),
         ),
       ),
-      home: MultiBlocProvider(
-        providers: [
-          BlocProvider<PlaysCubit>(
-            create: (BuildContext context) => PlaysCubit(),
-          ),
-          BlocProvider<HeaderCubit>(
-            create: (BuildContext context) => HeaderCubit()..loadInfo(),
-          ),
-          BlocProvider<AdminCubit>(
-            create: (BuildContext context) => AdminCubit(),
-          ),
-        ],
-        child: const PlayScreen(),
+      home: SelectionArea(
+        child: MultiBlocProvider(
+          providers: [
+            BlocProvider<PlaysCubit>(
+              create: (BuildContext context) => PlaysCubit(),
+            ),
+            BlocProvider<HeaderCubit>(
+              create: (BuildContext context) => HeaderCubit()..loadInfo(),
+            ),
+            BlocProvider<AdminCubit>(
+              create: (BuildContext context) => AdminCubit(),
+            ),
+          ],
+          child: const PlayScreen(),
+        ),
       ),
     );
   }

@@ -162,13 +162,31 @@ class _PlaySelectionState extends State<PlaySelection> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        ElevatedButton(
-                          onPressed: state is PlaysChangeState
-                              ? (state.isValidPlay && !state.exceededTokens
-                                  ? cubit.calcultaSummary
-                                  : null)
-                              : null,
-                          child: const Text('Ver Resumen'),
+                        Center(
+                          child: SizedBox(
+                            height: 30,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                TextButton(
+                                  onPressed: () =>
+                                      cubit.togglePlaysSelections(),
+                                  child: const Text('Cancelar'),
+                                ),
+                                const VerticalDivider(),
+                                ElevatedButton(
+                                  onPressed: state is PlaysChangeState
+                                      ? (state.isValidPlay &&
+                                              !state.exceededTokens
+                                          ? cubit.calcultaSummary
+                                          : null)
+                                      : null,
+                                  child: const Text('Ver Resumen'),
+                                ),
+                              ],
+                            ),
+                          ),
                         ),
                       ],
                     ),
@@ -251,31 +269,6 @@ class _SummaryList extends StatelessWidget {
               maxHeight: state.ticketsCount < 4 ? 200 : 400,
               maxWidth: WindowSizeContants.compact,
             ),
-            // child: ListView.separated(
-            //   scrollDirection: Axis.vertical,
-            //   shrinkWrap: true,
-            //   physics: const ClampingScrollPhysics(),
-            //   itemBuilder: (context, index) {
-            //     return Row(
-            //       mainAxisSize: MainAxisSize.min,
-            //       crossAxisAlignment: CrossAxisAlignment.start,
-            //       children: [
-            //         SizedBox(
-            //           width: 50,
-            //           child: Text(
-            //             '${index + 1}',
-            //             style: const TextStyle(
-            //               fontSize: 14,
-            //             ),
-            //           ),
-            //         ),
-            //         TicketInfo(options: state.tickets[index])
-            //       ],
-            //     );
-            //   },
-            //   itemCount: state.tickets.length,
-            //   separatorBuilder: (context, index) => const Divider(),
-            // ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -310,7 +303,7 @@ class _SummaryList extends StatelessWidget {
                             ),
                           ),
                           Expanded(
-                              child: TicketInfo2(
+                              child: TicketInfo(
                             options: state.tickets[index],
                             showPtsRow: false,
                           )),
@@ -333,180 +326,3 @@ class _SummaryList extends StatelessWidget {
     );
   }
 }
-
-// class SelectionSummary extends StatelessWidget {
-//   const SelectionSummary({Key? key}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     double screenWidth = MediaQuery.sizeOf(context).width;
-//     final isCompressedView = screenWidth <= WindowSizeContants.compact;
-//     return ConstrainedBox(
-//       constraints: const BoxConstraints(
-//         maxHeight: 400,
-//       ),
-//       child: Builder(
-//         builder: (context) {
-//           if (isCompressedView) {
-//             return Column(
-//               crossAxisAlignment: CrossAxisAlignment.start,
-//               children: [
-//                 const Text(
-//                   'Resumen',
-//                   style: TextStyle(
-//                     fontSize: 16,
-//                     fontWeight: FontWeight.bold,
-//                   ),
-//                 ),
-//                 const Text(
-//                   'Total de Tickets 10',
-//                   style: TextStyle(
-//                     fontSize: 14,
-//                   ),
-//                 ),
-//                 const SizedBox(height: 16),
-//                 Expanded(
-//                   child: ListView.separated(
-//                     physics: const ClampingScrollPhysics(),
-//                     itemBuilder: (context, index) {
-//                       return IntrinsicHeight(
-//                         child: Row(
-//                           children: [
-//                             SizedBox(
-//                               width: 30,
-//                               child: Column(
-//                                 children: [
-//                                   Text(
-//                                     '${index + 1}',
-//                                     style: const TextStyle(
-//                                       fontSize: 14,
-//                                     ),
-//                                   ),
-//                                   Expanded(
-//                                     child: Container(),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                             const SizedBox(width: 10),
-//                             const Column(
-//                               crossAxisAlignment: CrossAxisAlignment.start,
-//                               mainAxisSize: MainAxisSize.min,
-//                               children: [
-//                                 TicketInfo(),
-//                               ],
-//                             ),
-//                           ],
-//                         ),
-//                       );
-//                     },
-//                     itemCount: 10,
-//                     separatorBuilder: (context, index) => const Divider(),
-//                   ),
-//                 ),
-//                 const SizedBox(height: 20),
-//                 const Row(
-//                   mainAxisAlignment: MainAxisAlignment.center,
-//                   children: [
-//                     ElevatedButton(
-//                       onPressed: null,
-//                       child: Text('Modificar'),
-//                     ),
-//                     SizedBox(width: 20),
-//                     ElevatedButton(
-//                       onPressed: null,
-//                       child: Text('Confirmar'),
-//                     ),
-//                   ],
-//                 ),
-//               ],
-//             );
-//           } else {
-//             return Row(
-//               mainAxisSize: MainAxisSize.min,
-//               children: [
-//                 const Column(
-//                   crossAxisAlignment: CrossAxisAlignment.start,
-//                   children: [
-//                     Text(
-//                       'Resumen',
-//                       style: TextStyle(
-//                         fontSize: 16,
-//                         fontWeight: FontWeight.bold,
-//                       ),
-//                     ),
-//                     Text(
-//                       'Total de Tickets 10',
-//                       style: TextStyle(
-//                         fontSize: 14,
-//                       ),
-//                     ),
-//                   ],
-//                 ),
-//                 const SizedBox(width: 40),
-//                 ConstrainedBox(
-//                   constraints: const BoxConstraints(maxWidth: 400),
-//                   child: ListView.separated(
-//                     physics: const ClampingScrollPhysics(),
-//                     itemBuilder: (context, index) {
-//                       return IntrinsicHeight(
-//                         child: Row(
-//                           children: [
-//                             SizedBox(
-//                               width: 50,
-//                               child: Column(
-//                                 children: [
-//                                   Text(
-//                                     '${index + 1}',
-//                                     style: const TextStyle(
-//                                       fontSize: 14,
-//                                     ),
-//                                   ),
-//                                   Expanded(
-//                                     child: Container(),
-//                                   ),
-//                                 ],
-//                               ),
-//                             ),
-//                             const SizedBox(width: 20),
-//                             const Column(
-//                               mainAxisSize: MainAxisSize.min,
-//                               children: [
-//                                 TicketInfo(),
-//                               ],
-//                             ),
-//                           ],
-//                         ),
-//                       );
-//                     },
-//                     itemCount: 10,
-//                     separatorBuilder: (context, index) => const Divider(),
-//                   ),
-//                 ),
-//                 const SizedBox(width: 40),
-//                 const Row(
-//                   mainAxisSize: MainAxisSize.min,
-//                   children: [
-//                     Column(
-//                       children: [
-//                         ElevatedButton(
-//                           onPressed: null,
-//                           child: Text('Modificar'),
-//                         ),
-//                         SizedBox(height: 20),
-//                         ElevatedButton(
-//                           onPressed: null,
-//                           child: Text('Confirmar'),
-//                         ),
-//                       ],
-//                     ),
-//                   ],
-//                 )
-//               ],
-//             );
-//           }
-//         },
-//       ),
-//     );
-//   }
-// }

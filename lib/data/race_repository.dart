@@ -8,7 +8,7 @@ import 'package:e_fecta/domain/repositories/race_repository.dart';
 class RaceRepositoryImpl implements RaceRepository {
   final firestore = FirebaseFirestore.instance;
   @override
-  Future<Raceday?> getRecedayInfo(String trackId) async {
+  Future<Raceday?> getBetAvailableRaceday(String trackId) async {
     final racedayResult = await firestore
         .collection('racedays')
         .where('trackId', isEqualTo: trackId)
@@ -241,5 +241,45 @@ class RaceRepositoryImpl implements RaceRepository {
     } catch (e) {
       return Future.value(false);
     }
+  }
+
+  @override
+  Future<List<Raceday>> getAllPastRacedaysForTrack(String trackId) async {
+    final racedayResult = await firestore
+        .collection('racedays')
+        .where('trackId', isEqualTo: trackId)
+        .where(
+          'closingDateTime',
+          isGreaterThanOrEqualTo: DateTime.now().subtract(
+            const Duration(days: 15),
+          ),
+        )
+        .where(
+          'closingDateTime',
+          isLessThan: DateTime.now(),
+        )
+        .orderBy('closingDateTime')
+        .get();
+    if (racedayResult.docs.isNotEmpty) {
+      final racedays = racedayResult.docs.map(
+        (raceday) {
+          List<List<int>> options = _mapRaces(raceday.data()['races']);
+          return Raceday(
+            id: raceday.id,
+            trackId: trackId,
+            tokensPerTicket: raceday['ticketCost'],
+            closingTime: DateTime.fromMillisecondsSinceEpoch(
+                raceday['closingDateTime'].millisecondsSinceEpoch),
+            racesOptions: options,
+            isOpen: raceday['opened'],
+            winners: const [],
+            prizePlaces: raceday.data()['prizePlaces'] ?? 3,
+          );
+        },
+      ).toList();
+      racedays.sort((a, b) => a.closingTime.isAfter(b.closingTime) ? -1 : 1);
+      return racedays;
+    }
+    return [];
   }
 }
