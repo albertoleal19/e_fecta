@@ -19,8 +19,8 @@ class HeaderCubit extends Cubit<HeaderState> {
   bool _adminActive = false;
 
   Future<void> loadInfo() async {
+    final user = await userRepository.getAuthenticatedUser();
     final tracksResponse = await receRepository.getTracks();
-    final user = await userRepository.authenticate('', '');
 
     tracks = tracksResponse;
     selectedTrack = tracks.first;

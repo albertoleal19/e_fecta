@@ -11,6 +11,10 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<HeaderCubit>();
+    // This make data being load just once, even if widget is re-build
+    if (cubit.state is HeaderInitial) {
+      cubit.loadInfo();
+    }
     return BlocListener<PlaysCubit, PlaysState>(
       listener: (context, state) {
         if (state is PlaysFinished) {
@@ -25,6 +29,8 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
             } else {
               context.read<PlaysCubit>().setTrack(state.selectedTrack.id);
             }
+          } else if (state is HeaderInitial) {
+            cubit.loadInfo();
           }
         },
         builder: (context, state) {

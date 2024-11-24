@@ -1,6 +1,9 @@
-import 'package:e_fecta/presentation/plays/play_screen.dart';
+import 'package:e_fecta/core/app_colors.dart';
+import 'package:e_fecta/presentation/common/login/cubit/login_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -47,7 +50,27 @@ class _LoginScreenState extends State<LoginScreen> {
                   const Text(
                     'Login to your account',
                   ),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 15),
+                  BlocConsumer<LoginCubit, LoginState>(
+                    listener: (context, state) {
+                      if (state is LoginSuccess) {
+                        context.go('/');
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is LoginFailed) {
+                        return const Text(
+                          'Error. Por favor revise sus credenciales',
+                          style: TextStyle(
+                            color: AppColors.errorRed,
+                            fontSize: 16,
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  const SizedBox(height: 15),
                   TextField(
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -120,15 +143,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton(
                     onPressed: () async {
                       try {
-                        // await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        print('Tap on Login ');
+
+                        context.read<LoginCubit>().loginUser(
+                            usernameController.text, passwordController.text);
+                        // await FirebaseAuth.instance
+                        //     .signInWithEmailAndPassword(
                         //   email: usernameController.text,
                         //   password: passwordController.text,
                         // );
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const PlayScreen(),
-                          ),
-                        );
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const PlayScreen(),
+                        //   ),
+                        // );
                       } on FirebaseAuthException catch (e) {
                         if (e.code == 'user-not-found') {
                           print('No user found for that email.');
@@ -146,7 +174,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Login now',
+                      'Login now A',
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
@@ -155,17 +183,17 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton(
                     onPressed: () async {
                       try {
-                        await FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                          email: 'albertoleal19+1@gmail.com',
-                          password: '12345678',
-                        );
+                        // await FirebaseAuth.instance
+                        //     .createUserWithEmailAndPassword(
+                        //   email: 'linofuenma+1@gmail.com',
+                        //   password: '12345678',
+                        // );
                         print('User Registered Successfuly');
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const PlayScreen(),
-                          ),
-                        );
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const PlayScreen(),
+                        //   ),
+                        // );
                       } on FirebaseAuthException catch (e) {
                         print('Error on register: $e');
                       }
