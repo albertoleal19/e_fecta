@@ -73,4 +73,13 @@ class UserRepositoryImpl implements UserRepository {
 
     //return await getUser(GetUserBy.uid, credential.user?.uid ?? '');
   }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await authenticator.signOut();
+    } catch (e) {
+      rethrow;
+    }
+  }
 }

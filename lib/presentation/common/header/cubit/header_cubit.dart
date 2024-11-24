@@ -48,6 +48,11 @@ class HeaderCubit extends Cubit<HeaderState> {
     _emitHeaderChangeState();
   }
 
+  Future<void> logoutUser() async {
+    await userRepository.logout();
+    emit(HeaderLogout());
+  }
+
   _emitHeaderChangeState() {
     emit(
       HeaderInfoChanged(

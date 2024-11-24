@@ -18,6 +18,8 @@ class HeaderInfoChanged extends HeaderState {
   final bool adminActive;
 }
 
+class HeaderLogout extends HeaderState {}
+
 // class HeaderInfoChanged extends HeaderInfoLoaded {
 //   HeaderInfoChanged({
 //     required List<Track> tracks,

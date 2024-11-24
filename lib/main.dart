@@ -76,6 +76,7 @@ class EfectaApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       routerConfig: _router,
       title: 'E-Fecta',
       theme: ThemeData(
