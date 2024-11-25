@@ -1,6 +1,9 @@
-import 'package:e_fecta/presentation/plays/play_screen.dart';
+import 'package:e_fecta/core/app_colors.dart';
+import 'package:e_fecta/presentation/common/login/cubit/login_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -40,14 +43,34 @@ class _LoginScreenState extends State<LoginScreen> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Text(
-                    'Welcome back',
+                    'Bienvenido de vuelta',
                     style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Login to your account',
+                    'Inicia sesión',
                   ),
-                  const SizedBox(height: 35),
+                  const SizedBox(height: 15),
+                  BlocConsumer<LoginCubit, LoginState>(
+                    listener: (context, state) {
+                      if (state is LoginSuccess) {
+                        context.go('/');
+                      }
+                    },
+                    builder: (context, state) {
+                      if (state is LoginFailed) {
+                        return const Text(
+                          'Error. Por favor revise sus credenciales',
+                          style: TextStyle(
+                            color: AppColors.errorRed,
+                            fontSize: 16,
+                          ),
+                        );
+                      }
+                      return const SizedBox.shrink();
+                    },
+                  ),
+                  const SizedBox(height: 15),
                   TextField(
                     decoration: const InputDecoration(
                       labelText: 'Email',
@@ -89,30 +112,30 @@ class _LoginScreenState extends State<LoginScreen> {
                     controller: passwordController,
                   ),
                   const SizedBox(height: 25),
-                  Row(
+                  const Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(
-                            height: 24,
-                            width: 24,
-                            child: Checkbox(
-                              value: _isChecked,
-                              onChanged: onChanged,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          const Text(
-                            'Remember me',
-                          ),
-                        ],
-                      ),
-                      const SizedBox(width: 25),
-                      const Text(
-                        'Forgot password?',
+                      // Row(
+                      //   mainAxisSize: MainAxisSize.min,
+                      //   children: [
+                      //     SizedBox(
+                      //       height: 24,
+                      //       width: 24,
+                      //       child: Checkbox(
+                      //         value: _isChecked,
+                      //         onChanged: onChanged,
+                      //       ),
+                      //     ),
+                      //     const SizedBox(width: 8),
+                      //     const Text(
+                      //       'Remember me',
+                      //     ),
+                      //   ],
+                      // ),
+                      SizedBox(width: 25),
+                      Text(
+                        'Olvidaste tu password?',
                       ),
                     ],
                   ),
@@ -120,15 +143,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   OutlinedButton(
                     onPressed: () async {
                       try {
-                        // await FirebaseAuth.instance.signInWithEmailAndPassword(
+                        print('Tap on Login ');
+
+                        context.read<LoginCubit>().loginUser(
+                            usernameController.text, passwordController.text);
+                        // await FirebaseAuth.instance
+                        //     .signInWithEmailAndPassword(
                         //   email: usernameController.text,
                         //   password: passwordController.text,
                         // );
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const PlayScreen(),
-                          ),
-                        );
+                        // Navigator.of(context).push(
+                        //   MaterialPageRoute(
+                        //     builder: (context) => const PlayScreen(),
+                        //   ),
+                        // );
                       } on FirebaseAuthException catch (e) {
                         if (e.code == 'user-not-found') {
                           print('No user found for that email.');
@@ -146,44 +174,44 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                     child: const Text(
-                      'Login now',
+                      'Iniciar Sesión',
                       style: TextStyle(
                           color: Colors.white, fontWeight: FontWeight.bold),
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  OutlinedButton(
-                    onPressed: () async {
-                      try {
-                        await FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
-                          email: 'albertoleal19+1@gmail.com',
-                          password: '12345678',
-                        );
-                        print('User Registered Successfuly');
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => const PlayScreen(),
-                          ),
-                        );
-                      } on FirebaseAuthException catch (e) {
-                        print('Error on register: $e');
-                      }
-                    },
-                    //style: OutlinedButton.
-                    style: OutlinedButton.styleFrom(
-                      backgroundColor: Colors.white70,
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 20,
-                        horizontal: 10,
-                      ),
-                    ),
-                    child: const Text(
-                      'Register',
-                      style: TextStyle(
-                          color: Colors.green, fontWeight: FontWeight.bold),
-                    ),
-                  ),
+                  // const SizedBox(height: 10),
+                  // OutlinedButton(
+                  //   onPressed: () async {
+                  //     try {
+                  //       // await FirebaseAuth.instance
+                  //       //     .createUserWithEmailAndPassword(
+                  //       //   email: 'linofuenma+1@gmail.com',
+                  //       //   password: '12345678',
+                  //       // );
+                  //       print('User Registered Successfuly');
+                  //       // Navigator.of(context).push(
+                  //       //   MaterialPageRoute(
+                  //       //     builder: (context) => const PlayScreen(),
+                  //       //   ),
+                  //       // );
+                  //     } on FirebaseAuthException catch (e) {
+                  //       print('Error on register: $e');
+                  //     }
+                  //   },
+                  //   //style: OutlinedButton.
+                  //   style: OutlinedButton.styleFrom(
+                  //     backgroundColor: Colors.white70,
+                  //     padding: const EdgeInsets.symmetric(
+                  //       vertical: 20,
+                  //       horizontal: 10,
+                  //     ),
+                  //   ),
+                  //   child: const Text(
+                  //     'Register',
+                  //     style: TextStyle(
+                  //         color: Colors.green, fontWeight: FontWeight.bold),
+                  //   ),
+                  // ),
                 ],
               ),
             ),

@@ -5,4 +5,6 @@ abstract class UserRepository {
   Future<User> authenticate(String email, String password);
 
   Future<User?> getAuthenticatedUser();
+
+  Future<void> logout();
 }

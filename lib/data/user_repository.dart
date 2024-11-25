@@ -29,7 +29,7 @@ class UserRepositoryImpl implements UserRepository {
 
     final userInfo = (await firestore
             .collection('users')
-            .where(GetUserBy.uid.toDataValue(), isEqualTo: authUser.uid)
+            .where(GetUserBy.uid.toDataValue(), isEqualTo: authUser?.uid)
             .limit(1)
             .get())
         .docs
@@ -46,26 +46,40 @@ class UserRepositoryImpl implements UserRepository {
 
   @override
   Future<user.User> authenticate(String email, String password) async {
-    final credential = await authenticator.signInWithEmailAndPassword(
-      email: 'albertoleal19+1@gmail.com',
-      password: '12345678',
-    );
-    final userInfo = (await firestore
-            .collection('users')
-            .where(GetUserBy.uid.toDataValue(),
-                isEqualTo: credential.user?.uid ?? '')
-            .limit(1)
-            .get())
-        .docs
-        .first;
+    try {
+      final credential = await authenticator.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final userInfo = (await firestore
+              .collection('users')
+              .where(GetUserBy.uid.toDataValue(),
+                  isEqualTo: credential.user?.uid ?? '')
+              .limit(1)
+              .get())
+          .docs
+          .first;
 
-    return user.User(
-      email: userInfo['email'],
-      username: userInfo['username'],
-      id: userInfo.id,
-      tokens: userInfo['balance'],
-      isAdmin: userInfo['type'] == 'admin',
-    );
+      return user.User(
+        email: userInfo['email'],
+        username: userInfo['username'],
+        id: userInfo.id,
+        tokens: userInfo['balance'],
+        isAdmin: userInfo['type'] == 'admin',
+      );
+    } catch (e) {
+      rethrow;
+    }
+
     //return await getUser(GetUserBy.uid, credential.user?.uid ?? '');
+  }
+
+  @override
+  Future<void> logout() async {
+    try {
+      await authenticator.signOut();
+    } catch (e) {
+      rethrow;
+    }
   }
 }

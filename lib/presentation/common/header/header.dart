@@ -4,6 +4,7 @@ import 'package:e_fecta/presentation/common/header/cubit/header_cubit.dart';
 import 'package:e_fecta/presentation/plays/cubit/plays_cubit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 
 class Header extends StatelessWidget implements PreferredSizeWidget {
   const Header({Key? key}) : super(key: key);
@@ -11,6 +12,10 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<HeaderCubit>();
+    // This make data being load just once, even if widget is re-build
+    if (cubit.state is HeaderInitial) {
+      cubit.loadInfo();
+    }
     return BlocListener<PlaysCubit, PlaysState>(
       listener: (context, state) {
         if (state is PlaysFinished) {
@@ -25,6 +30,10 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
             } else {
               context.read<PlaysCubit>().setTrack(state.selectedTrack.id);
             }
+          } else if (state is HeaderInitial) {
+            cubit.loadInfo();
+          } else if (state is HeaderLogout) {
+            context.go('/login');
           }
         },
         builder: (context, state) {
@@ -83,15 +92,15 @@ class Header extends StatelessWidget implements PreferredSizeWidget {
                   ),
                 ),
               },
-              // GestureDetector(
-              //   // onTap: () =>
-              //   //     context.read<HeaderCubit>().displayRaceConfiguraiton(),
-              //   onTap: () => Scaffold.of(context).openEndDrawer(),
-              //   child: const SizedBox(
-              //     width: 50,
-              //     child: Icon(Icons.account_circle_rounded),
-              //   ),
-              // ),
+              TextButton.icon(
+                icon: const Icon(Icons.logout_outlined),
+                onPressed: () {
+                  cubit.logoutUser();
+                },
+                label: const Text(
+                  'Salir',
+                ),
+              )
             ],
           );
         },
