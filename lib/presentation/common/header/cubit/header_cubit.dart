@@ -20,6 +20,7 @@ class HeaderCubit extends Cubit<HeaderState> {
 
   Future<void> loadInfo() async {
     final user = await userRepository.getAuthenticatedUser();
+    if (user == null) return;
     final tracksResponse = await receRepository.getTracks();
 
     tracks = tracksResponse;
