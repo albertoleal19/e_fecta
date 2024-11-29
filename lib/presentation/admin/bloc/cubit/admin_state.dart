@@ -35,10 +35,12 @@ class AdminSetWinnersSectionShownState extends AdminState {
   const AdminSetWinnersSectionShownState({
     required this.raceday,
     required this.race,
+    this.isLoading = false,
   });
 
   final Raceday raceday;
   final int race;
+  final bool isLoading;
   // @override
   // List<Object> get props => [optionsToDisplay];
 }
