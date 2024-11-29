@@ -137,7 +137,9 @@ class RacedayGeneralInfo extends StatelessWidget {
                 ),
                 const VerticalDivider(),
                 IconButton(
-                  onPressed: () => {},
+                  onPressed: () => enableWinnersSetting
+                      ? cubit.showSetWinnersSection(racedayId)
+                      : null,
                   icon: const Icon(FontAwesomeIcons.medal),
                 ),
               ],
@@ -166,7 +168,7 @@ class RacedayGeneralInfo extends StatelessWidget {
                         '''${isOpen ? 'Cerrar' : 'Abrir'} Polla ($racedayId)'''),
                     content: Text(
                       isOpen
-                          ? 'Al cerrar la polla, no se permitira crear mas tickets'
+                          ? 'Al cerrar la polla, no se permitirá crear más tickets'
                           : 'Al  abrir la polla,  se permitirá la creación de tickets.',
                     ),
                     actions: <Widget>[
@@ -183,7 +185,7 @@ class RacedayGeneralInfo extends StatelessWidget {
                         style: TextButton.styleFrom(
                           textStyle: Theme.of(context).textTheme.labelLarge,
                         ),
-                        child: const Text('Corfirmar'),
+                        child: const Text('Confirmar'),
                         onPressed: () async {
                           // perform action
                           await cubit.changeRacedayStatus(
