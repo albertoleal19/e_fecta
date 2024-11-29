@@ -29,7 +29,7 @@ class _PlaySelectionState extends State<PlaySelection> {
       child: Container(
         constraints: const BoxConstraints(
           minWidth: 296,
-          minHeight: 196,
+          // minHeight: 196,
           maxWidth: 800,
         ),
         padding: const EdgeInsets.all(30.0),
@@ -66,23 +66,21 @@ class _PlaySelectionState extends State<PlaySelection> {
                 children: [
                   SizedBox(
                     height: 30,
-                    child: Expanded(
-                      child: Row(
-                        mainAxisAlignment: isCompressedView
-                            ? MainAxisAlignment.start
-                            : MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Programada para: ${closingTime.year}/${closingTime.month}/${closingTime.day}',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                          const VerticalDivider(),
-                          Text(
-                            '$tokensPerTicket Tokens x ticket',
-                            style: const TextStyle(fontSize: 14),
-                          ),
-                        ],
-                      ),
+                    child: Row(
+                      mainAxisAlignment: isCompressedView
+                          ? MainAxisAlignment.start
+                          : MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Programada para: ${closingTime.year}/${closingTime.month}/${closingTime.day}',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        const VerticalDivider(),
+                        Text(
+                          '$tokensPerTicket Tokens x ticket',
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(height: 8),
