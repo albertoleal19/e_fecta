@@ -30,11 +30,6 @@ class _WinnersConfigState extends State<WinnersConfig> {
   int secondPlace = -1;
   int thirdPlace = -1;
 
-  @override
-  void initState() {
-    super.initState();
-  }
-
   bool _shouldBeEnabled(int race) {
     return race >= widget.raceNumber;
   }
@@ -59,72 +54,37 @@ class _WinnersConfigState extends State<WinnersConfig> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           mainAxisSize: MainAxisSize.min,
           children: [
-            // SegmentedButton<int>(
-            //   segments: const <ButtonSegment<int>>[
-            //     ButtonSegment<int>(
-            //         value: 1,
-            //         label: Text('Day'),
-            //         icon: Icon(Icons.calendar_view_day)),
-            //     ButtonSegment<int>(
-            //         value: 2,
-            //         label: Text('Week'),
-            //         icon: Icon(Icons.calendar_view_week)),
-            //     ButtonSegment<int>(
-            //         value: 3,
-            //         label: Text('Month'),
-            //         icon: Icon(Icons.calendar_view_month)),
-            //     ButtonSegment<int>(
-            //         value: 4,
-            //         label: Text('Year'),
-            //         icon: Icon(Icons.calendar_today)),
-            //   ],
-            //   selected: <int>{1},
-            //   onSelectionChanged: (Set<int> newSelection) {
-            //     setState(() {
-            //       // By default there is only a single segment that can be
-            //       // selected at one time, so its value is always the first
-            //       // item in the selected set.
-            //       // calendarView = newSelection.first;
-            //     });
-            //   },
-            // ),
             SegmentedButton<int>(
               segments: <ButtonSegment<int>>[
                 ButtonSegment<int>(
                   value: 1,
                   label: const Text('1ra'),
                   enabled: _shouldBeEnabled(1),
-                  // icon: Icon(Icons.calendar_view_day),
                 ),
                 ButtonSegment<int>(
                   value: 2,
                   label: const Text('2da'),
                   enabled: _shouldBeEnabled(2),
-                  // icon: Icon(Icons.calendar_view_week),
                 ),
                 ButtonSegment<int>(
                   value: 3,
                   label: const Text('3ra'),
                   enabled: _shouldBeEnabled(3),
-                  // icon: Icon(Icons.calendar_view_month),
                 ),
                 ButtonSegment<int>(
                   value: 4,
                   label: const Text('4ta'),
                   enabled: _shouldBeEnabled(4),
-                  // icon: Icon(Icons.calendar_today),
                 ),
                 ButtonSegment<int>(
                   value: 5,
                   label: const Text('5ta'),
                   enabled: _shouldBeEnabled(5),
-                  // icon: Icon(Icons.calendar_today),
                 ),
                 ButtonSegment<int>(
                   value: 6,
                   label: const Text('6ta'),
                   enabled: _shouldBeEnabled(6),
-                  // icon: Icon(Icons.calendar_today),
                 ),
               ],
               selected: <int>{widget.raceNumber},
@@ -186,7 +146,6 @@ class _WinnersConfigState extends State<WinnersConfig> {
                 },
               ),
             },
-
             const SizedBox(height: 20),
             Center(
               child: SizedBox(
@@ -214,6 +173,22 @@ class _WinnersConfigState extends State<WinnersConfig> {
                   ],
                 ),
               ),
+            ),
+            BlocBuilder<AdminCubit, AdminState>(
+              buildWhen: (previous, current) =>
+                  current is AdminSetWinnersSectionShownState,
+              builder: (context, state) {
+                if ((state as AdminSetWinnersSectionShownState).isLoading) {
+                  return const Padding(
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 20.0, vertical: 20),
+                    child: LinearProgressIndicator(
+                      color: AppColors.darkBlue,
+                    ),
+                  );
+                }
+                return const SizedBox.shrink();
+              },
             ),
           ],
         ),

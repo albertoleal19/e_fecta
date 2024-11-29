@@ -174,6 +174,15 @@ class AdminCubit extends Cubit<AdminState> {
     // int raceNumber,
     List<int> winners,
   ) async {
+    if (state is AdminSetWinnersSectionShownState) {
+      final previousState = (state as AdminSetWinnersSectionShownState);
+      emit(AdminSetWinnersSectionShownState(
+        race: previousState.race,
+        raceday: previousState.raceday,
+        isLoading: true,
+      ));
+    }
+
     final raceday = _racedays.firstWhere((element) => element.id == racedayId);
     final raceToSetWinners = raceday.raceToSetWinners;
     final setWinnersResponse =
@@ -202,6 +211,8 @@ class AdminCubit extends Cubit<AdminState> {
           );
         }
       }
+      emit(AdminInitial());
+      loadRacedaysInfo();
     }
 
     /// Error setting winners on raceday
