@@ -21,20 +21,12 @@ void main() async {
   runApp(const EfectaApp());
 }
 
-/// The route configuration.
-final GoRouter _router = GoRouter(
-  redirect: (context, state) async {
-    final isUserLoggedIn =
-        (await UserRepositoryImpl().getAuthenticatedUser()) != null;
-
-    if (isUserLoggedIn) {
-      return null;
-    } else {
-      return '/login';
-    }
-  },
-  routes: <RouteBase>[
+final GoRouter _route = GoRouter(
+  initialLocation: '/',
+  routes: [
     GoRoute(
+      name:
+          'play', // Optional, add name to your routes. Allows you navigate by name instead of path
       path: '/',
       builder: (BuildContext context, GoRouterState state) {
         return SelectionArea(
@@ -54,19 +46,28 @@ final GoRouter _router = GoRouter(
           ),
         );
       },
-      routes: <RouteBase>[
-        GoRoute(
-          path: 'login',
-          builder: (BuildContext context, GoRouterState state) {
-            return BlocProvider<LoginCubit>(
-              create: (context) => LoginCubit(),
-              child: const LoginScreen(),
-            );
-          },
-        ),
-      ],
+    ),
+    GoRoute(
+      name: 'login',
+      path: '/login',
+      builder: (BuildContext context, GoRouterState state) {
+        return BlocProvider<LoginCubit>(
+          create: (context) => LoginCubit(),
+          child: const LoginScreen(),
+        );
+      },
     ),
   ],
+  redirect: (context, state) async {
+    final isUserLoggedIn =
+        (await UserRepositoryImpl().getAuthenticatedUser()) != null;
+
+    if (isUserLoggedIn) {
+      return null;
+    } else {
+      return '/login';
+    }
+  },
 );
 
 class EfectaApp extends StatelessWidget {
@@ -77,7 +78,7 @@ class EfectaApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      routerConfig: _router,
+      routerConfig: _route,
       title: 'E-Fecta',
       theme: ThemeData(
         colorScheme: const ColorScheme(

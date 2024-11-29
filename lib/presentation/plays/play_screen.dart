@@ -11,6 +11,7 @@ import 'package:e_fecta/presentation/plays/tickets_model.dart';
 import 'package:e_fecta/presentation/results/result_list_item.dart';
 import 'package:firebase_ui_firestore/firebase_ui_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class PlayScreen extends StatelessWidget {
@@ -19,7 +20,6 @@ class PlayScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.sizeOf(context).height;
-
     return Scaffold(
       appBar: const Header(),
       endDrawer: Drawer(
@@ -146,122 +146,123 @@ class PlayScreen extends StatelessWidget {
                                     style: TextStyle(fontSize: 56),
                                   ),
                                 ),
-                                BlocBuilder<PlaysCubit, PlaysState>(
-                                  buildWhen: (previous, current) =>
-                                      current is PlaysTicketsDisplay,
-                                  builder: (context, state) {
-                                    return Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 20,
-                                      ),
-                                      child: Container(
-                                        color: const Color(0x36405380),
-                                        height: 80,
-                                        padding: const EdgeInsets.only(
-                                          left: 20.0,
-                                          right: 20.0,
-                                        ),
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            const Text(
-                                              'Pollas Jugadas',
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 30),
-                                            Text(
-                                              '${state.ticketsCount}',
-                                              style: const TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 24,
-                                              ),
-                                            ),
-                                            const SizedBox(width: 66),
-                                            const SizedBox(
-                                              height: 60,
-                                              child: VerticalDivider(),
-                                            ),
-                                            const SizedBox(width: 66),
-                                            SizedBox(
-                                              width: 200,
-                                              child: Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.center,
-                                                children: [
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      const Text(
-                                                        'Premio 1er Lugar:',
-                                                        style: TextStyle(
-                                                            fontSize: 12),
-                                                      ),
-                                                      const Text(
-                                                        '400 Tokens',
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      const Text(
-                                                        'Premio 2do Lugar:',
-                                                        style: TextStyle(
-                                                            fontSize: 12),
-                                                      ),
-                                                      const Text(
-                                                        '200 Tokens',
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      )
-                                                    ],
-                                                  ),
-                                                  const SizedBox(height: 4),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceBetween,
-                                                    children: [
-                                                      const Text(
-                                                        'Premio 3er Lugar:',
-                                                        style: TextStyle(
-                                                            fontSize: 12),
-                                                      ),
-                                                      const Text(
-                                                        '100 Tokens',
-                                                        style: TextStyle(
-                                                            fontSize: 12,
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                ),
+                                const PlayOverview(),
+                                // BlocBuilder<PlaysCubit, PlaysState>(
+                                //   buildWhen: (previous, current) =>
+                                //       current is PlaysTicketsDisplay,
+                                //   builder: (context, state) {
+                                //     return Padding(
+                                //       padding: const EdgeInsets.only(
+                                //         bottom: 20,
+                                //       ),
+                                //       child: Container(
+                                //         color: const Color(0x36405380),
+                                //         height: 80,
+                                //         padding: const EdgeInsets.only(
+                                //           left: 20.0,
+                                //           right: 20.0,
+                                //         ),
+                                //         child: Row(
+                                //           mainAxisAlignment:
+                                //               MainAxisAlignment.center,
+                                //           children: [
+                                //             const Text(
+                                //               'Pollas Jugadas',
+                                //               style: TextStyle(
+                                //                 fontWeight: FontWeight.bold,
+                                //               ),
+                                //             ),
+                                //             const SizedBox(width: 30),
+                                //             Text(
+                                //               '${state.ticketsCount}',
+                                //               style: const TextStyle(
+                                //                 fontWeight: FontWeight.bold,
+                                //                 fontSize: 24,
+                                //               ),
+                                //             ),
+                                //             const SizedBox(width: 66),
+                                //             const SizedBox(
+                                //               height: 60,
+                                //               child: VerticalDivider(),
+                                //             ),
+                                //             const SizedBox(width: 66),
+                                //             SizedBox(
+                                //               width: 200,
+                                //               child: Column(
+                                //                 mainAxisAlignment:
+                                //                     MainAxisAlignment.center,
+                                //                 children: [
+                                //                   Row(
+                                //                     mainAxisAlignment:
+                                //                         MainAxisAlignment
+                                //                             .spaceBetween,
+                                //                     children: [
+                                //                       const Text(
+                                //                         'Premio 1er Lugar:',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12),
+                                //                       ),
+                                //                       const Text(
+                                //                         '400 Tokens',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12,
+                                //                             fontWeight:
+                                //                                 FontWeight
+                                //                                     .bold),
+                                //                       )
+                                //                     ],
+                                //                   ),
+                                //                   const SizedBox(height: 4),
+                                //                   Row(
+                                //                     mainAxisAlignment:
+                                //                         MainAxisAlignment
+                                //                             .spaceBetween,
+                                //                     children: [
+                                //                       const Text(
+                                //                         'Premio 2do Lugar:',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12),
+                                //                       ),
+                                //                       const Text(
+                                //                         '200 Tokens',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12,
+                                //                             fontWeight:
+                                //                                 FontWeight
+                                //                                     .bold),
+                                //                       )
+                                //                     ],
+                                //                   ),
+                                //                   const SizedBox(height: 4),
+                                //                   Row(
+                                //                     mainAxisAlignment:
+                                //                         MainAxisAlignment
+                                //                             .spaceBetween,
+                                //                     children: [
+                                //                       const Text(
+                                //                         'Premio 3er Lugar:',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12),
+                                //                       ),
+                                //                       const Text(
+                                //                         '100 Tokens',
+                                //                         style: TextStyle(
+                                //                             fontSize: 12,
+                                //                             fontWeight:
+                                //                                 FontWeight
+                                //                                     .bold),
+                                //                       )
+                                //                     ],
+                                //                   ),
+                                //                 ],
+                                //               ),
+                                //             ),
+                                //           ],
+                                //         ),
+                                //       ),
+                                //     );
+                                //   },
+                                // ),
                                 BlocBuilder<PlaysCubit, PlaysState>(
                                   buildWhen: (previous, current) =>
                                       current is PlaysResultsRacedays,
@@ -438,6 +439,196 @@ class PlayScreen extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class PlayOverview extends StatelessWidget {
+  const PlayOverview({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    double screenWidth = MediaQuery.sizeOf(context).width;
+    final isCompressedView = screenWidth <= WindowSizeContants.medium;
+
+    return BlocBuilder<PlaysCubit, PlaysState>(
+      buildWhen: (previous, current) => current is PlaysTicketsDisplay,
+      builder: (context, state) {
+        return Padding(
+          padding: const EdgeInsets.only(
+            bottom: 20,
+          ),
+          child: Container(
+            color: const Color(0x36405380),
+            padding: const EdgeInsets.only(
+              left: 20.0,
+              right: 20.0,
+            ),
+            child: Builder(builder: (context) {
+              if (isCompressedView) {
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Column(
+                        children: [
+                          const Text(
+                            'Pollas Jugadas',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          Text(
+                            '${state.ticketsCount}',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 24,
+                            ),
+                          ),
+                        ],
+                      ),
+                      // const SizedBox(height: 30),
+                      const Divider(),
+                      // const SizedBox(width: 30),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 1er Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '400 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 2do Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '200 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 3er Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '100 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return SizedBox(
+                height: 80,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Pollas Jugadas',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    const SizedBox(width: 30),
+                    Text(
+                      '${state.ticketsCount}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 24,
+                      ),
+                    ),
+                    const SizedBox(width: 66),
+                    const SizedBox(
+                      height: 60,
+                      child: VerticalDivider(),
+                    ),
+                    const SizedBox(width: 66),
+                    SizedBox(
+                      width: 200,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 1er Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '400 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 2do Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '200 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text(
+                                'Premio 3er Lugar:',
+                                style: TextStyle(fontSize: 12),
+                              ),
+                              const Text(
+                                '100 Tokens',
+                                style: TextStyle(
+                                    fontSize: 12, fontWeight: FontWeight.bold),
+                              )
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+          ),
+        );
+      },
     );
   }
 }
